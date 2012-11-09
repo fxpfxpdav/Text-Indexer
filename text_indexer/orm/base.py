@@ -1,0 +1,35 @@
+'''
+Created on Jul 12, 2012
+
+@author: dav
+'''
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine
+from sqlalchemy.schema import MetaData
+engine = None
+session = None
+
+def connect():
+    global session, engine
+    engine = create_engine('mysql+mysqldb://root:root@localhost:3306/text_indexer')
+    engine.echo=True
+    engine.connect()
+    print engine.execute('select * from tttt').fetchall()
+    from sqlalchemy.orm import sessionmaker
+    session = sessionmaker(bind=engine)
+    
+    
+def create():
+    global engine, DBBase
+    connect()
+    meta_data = MetaData()
+    meta_data.bind = engine
+
+    DBBase = declarative_base(metadata=meta_data)
+
+DBBase = None
+
+create()
+
+
+
