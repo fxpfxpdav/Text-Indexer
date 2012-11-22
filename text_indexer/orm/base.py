@@ -16,7 +16,8 @@ def connect():
     engine.connect()
     print engine.execute('select * from tttt').fetchall()
     from sqlalchemy.orm import sessionmaker
-    session = sessionmaker(bind=engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
     
     
 def create():
@@ -30,6 +31,7 @@ def create():
 DBBase = None
 
 create()
+
 
 
 

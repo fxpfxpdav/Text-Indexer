@@ -14,3 +14,4 @@ class Word(DBBase):
     
     def __repr__(self):
         return "Word(%r)" % (self.word)
+    

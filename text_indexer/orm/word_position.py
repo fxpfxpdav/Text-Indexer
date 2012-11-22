@@ -1,27 +1,32 @@
 from text_indexer.orm.base import DBBase
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer
-import word_song_association
+from sqlalchemy.orm import relationship
 
 class WordPosition(DBBase):
     __tablename__ = 'word_positions'
     
     id = Column(Integer, primary_key=True)
-    word_song_association_id = Column(Integer, ForeignKey('word_song_associations.id'))
-#    word_song_association_id = Column(Integer, ForeignKey(word_song_association.word_song_associations.c['id']))
-    row_position = Column('row_position', Integer, nullable=False)
-    stanza_position = Column('Stanza_position', Integer, nullable=False)
-    line_position = Column('line_position', Integer, nullable=False)
-    stanza_line_position = Column('stanza_line_position', Integer, nullable=False)
+#    word_song_association_id = Column(Integer, ForeignKey('word_song_associations.id'))
+    word_id = Column(Integer, ForeignKey('words.id'), nullable=False)
+    song_id = Column(Integer, ForeignKey('songs.id'), nullable=False)
+    row_word_number = Column('row_word_number', Integer, nullable=False)
+    stanza_number = Column('stanza_number', Integer, nullable=False)
+    line_number = Column('line_number', Integer, nullable=False)
+    stanza_line_number = Column('stanza_line_number', Integer, nullable=False)
+    
+    word = relationship('Word', backref='word_positions')
+    song = relationship('Song', backref='word_positions')
     
     
 
-    def __init__(self, word_song_association_id, row_position, stanza_position, line_position, stanza_line_position):
-        self.word_song_association_id = word_song_association_id
-        self.row_position = row_position
-        self.stanza_position = stanza_position
-        self.line_position = line_position
-        self.stanza_line_position = stanza_line_position
+    def __init__(self, word, song, row_word_number, stanza_number, line_number, stanza_line_number):
+        self.word = word
+        self.song = song
+        self.row_word_number = row_word_number
+        self.stanza_number = stanza_number
+        self.line_number = line_number
+        self.stanza_line_number = stanza_line_number
     
     def __repr__(self):
         return "WordPosition"
