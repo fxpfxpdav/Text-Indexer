@@ -30,7 +30,15 @@ Created on Jul 12, 2012
 from text_indexer.orm.base import DBBase
 import text_indexer.orm
 from text_indexer.orm.song import Song
+from text_indexer.orm.word import Word
 DBBase.metadata.create_all(text_indexer.orm.base.engine)
+from text_indexer.orm.base import session
 
 s = Song.get_songs(name='some nights', writer='Fun', word='some')[0]
 print s.writer
+word = session.query(Word).first()
+print word
+print word.get_indexes()
+wp = word.word_positions[1]
+print wp
+print wp.get_stanza()

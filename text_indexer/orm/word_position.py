@@ -29,4 +29,7 @@ class WordPosition(DBBase):
         self.stanza_line_number = stanza_line_number
     
     def __repr__(self):
-        return "WordPosition"
+        return "WordPosition(Word(%r) in Song(%r) line(%d), word(%d))" % (self.word.word, self.song.name, self.line_number, self.row_word_number)
+    
+    def get_stanza(self):
+        return self.song.get_stanza(self.stanza_number)
