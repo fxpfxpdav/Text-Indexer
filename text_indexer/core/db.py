@@ -29,4 +29,8 @@ Created on Jul 12, 2012
 #create()
 from text_indexer.orm.base import DBBase
 import text_indexer.orm
+from text_indexer.orm.song import Song
 DBBase.metadata.create_all(text_indexer.orm.base.engine)
+
+s = Song.get_songs(name='some nights', writer='Fun', word='some')[0]
+print s.writer
