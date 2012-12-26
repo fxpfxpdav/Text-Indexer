@@ -4,6 +4,8 @@ import wx.aui
 import wx.lib.platebtn as pbtn
 import pickle
 import os
+from text_indexer.ui.manage_songs_panel import ManageSongsPanel
+from text_indexer.ui.analysis_panel import AnalysisPanel
 try:
     from agw import pybusyinfo as PBI
 except ImportError: # if it's not there locally, try the wxPython lib.
@@ -16,7 +18,7 @@ class ParentFrame(wx.aui.AuiMDIParentFrame):
     def __init__(self, parent):
         wx.aui.AuiMDIParentFrame.__init__(self, parent, -1,
                                           title="Stress",
-                                          size=(1400,700),
+                                          size=(1400, 700),
                                           style=wx.DEFAULT_FRAME_STYLE)
         self.count = 0
         mb = self.MakeMenuBar()
@@ -27,10 +29,10 @@ class ParentFrame(wx.aui.AuiMDIParentFrame):
     def MakeMenuBar(self):
         mb = wx.MenuBar()
         menu = wx.Menu()
-        item = menu.Append(-1, "Import file\tCtrl-O")
-        self.Bind(wx.EVT_MENU, self.OnImportFile, item)
+        item = menu.Append(-1, "Manage songs\tCtrl-M")
+        self.Bind(wx.EVT_MENU, self.OnManageSongs, item)
         
-        item = menu.Append(-1, "Text analysis\tCtrl-O")
+        item = menu.Append(-1, "Text analysis\tCtrl-T")
         self.Bind(wx.EVT_MENU, self.OnTextAnalysis, item)
              
         item = menu.Append(-1, "Close")
@@ -38,31 +40,15 @@ class ParentFrame(wx.aui.AuiMDIParentFrame):
         mb.Append(menu, "&File")
         return mb
         
-    def OnImportFile(self, evt):
-
-        dlg = wx.FileDialog(
-            self, message="Choose a file",
-            defaultDir=os.getcwd(), 
-            defaultFile="",
-            style=wx.OPEN | wx.CHANGE_DIR
-            )
-
-        # Show the dialog and retrieve the user response. If it is the OK response, 
-        # process the data.
-        if dlg.ShowModal() == wx.ID_OK:
-            # This returns a Python list of files that were selected.
-            path = dlg.GetPath()
-
-            print path
-            
-            # TODO: add load file here
-
-        dlg.Destroy()    
+    def OnManageSongs(self, evt):
+        self.count += 1
+        child = ChildFrame(self, self.count, "Manage songs", ManageSongsPanel)
+        child.Show()
      
      
     def OnTextAnalysis(self, evt):
         self.count += 1
-        child = ChildFrame(self, self.count, "Orders Stress")
+        child = ChildFrame(self, self.count, "Analysis text", AnalysisPanel)
         child.Show()    
      
 
@@ -80,7 +66,7 @@ class ParentFrame(wx.aui.AuiMDIParentFrame):
 #----------------------------------------------------------------------
 
 class ChildFrame(wx.aui.AuiMDIChildFrame):
-    def __init__(self, parent, count, title):
+    def __init__(self, parent, count, title, panel):
         wx.aui.AuiMDIChildFrame.__init__(self, parent, -1,
                                          title=title)
         """
@@ -91,7 +77,7 @@ class ChildFrame(wx.aui.AuiMDIChildFrame):
         self.SetMenuBar(mb)
         """
         
-        p = OrderStressPanel(self, parent.campus_list)
+        p = panel(self)
         #p.SetBackgroundColour('YELLOW GREEN')       
 
         sizer = wx.BoxSizer()
