@@ -1,10 +1,14 @@
 import wx
 import os
+from text_indexer.ui.add_song import AddSongDialog
+from text_indexer.core.db import delete_song
+from text_indexer.orm.song import Song
 
 class ManageSongsPanel(wx.Panel):
     
     def __init__(self, parent):
         wx.Panel.__init__(self, parent, -1)
+        
     
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         
@@ -13,12 +17,12 @@ class ManageSongsPanel(wx.Panel):
         font = wx.Font(18, wx.SWISS, wx.NORMAL, wx.NORMAL, underline=True)
         text.SetFont(font)
         
-        sampleList = [str(i) for i in range(5)]
+        song_list = [s.name for s in Song.get_songs()]
         
-        self.lb1 = wx.ListBox(self, 60, (100, 100), (150, 200), sampleList, wx.LB_SINGLE)
+        self.lb1 = wx.ListBox(self, 60, (100, 100), (150, 200), song_list, wx.LB_SINGLE)
         
         btn1 = wx.Button(self, -1, "Import song", (300, 150))
-        self.Bind(wx.EVT_BUTTON, self.OnImportSong, btn1) 
+        self.Bind(wx.EVT_BUTTON, self.OnAddSong, btn1) 
         
         btn2 = wx.Button(self, -1, "Remove song", (300, 210))
         self.Bind(wx.EVT_BUTTON, self.OnRemoveSong, btn2) 
@@ -33,8 +37,31 @@ class ManageSongsPanel(wx.Panel):
     def OnRemoveSong(self, evt):
         selection = self.lb1.GetSelection()
         if selection != -1:
+            song = Song.get_songs(name=self.lb1.Items[selection])[0]
             self.lb1.Delete(selection)
-        print selection
+            delete_song(song)
+        
+    def OnAddSong(self, evt):
+        useMetal = False
+        if 'wxMac' in wx.PlatformInfo:
+            useMetal = self.cb.IsChecked()
+            
+        dlg = AddSongDialog(self, -1, "Import Song", size=(350, 200),
+                         #style=wx.CAPTION | wx.SYSTEM_MENU | wx.THICK_FRAME,
+                         style=wx.DEFAULT_DIALOG_STYLE, # & ~wx.CLOSE_BOX,
+                         useMetal=useMetal,
+                         )
+        dlg.CenterOnScreen()
+
+        # this does not return until the dialog is closed.
+        val = dlg.ShowModal()
+    
+        if val == wx.ID_OK:
+            self.log.WriteText("You pressed OK\n")
+        else:
+            self.log.WriteText("You pressed Cancel\n")
+
+        dlg.Destroy()
     
     def OnImportSong(self, evt):
         dlg = wx.FileDialog(

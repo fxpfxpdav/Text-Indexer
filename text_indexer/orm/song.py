@@ -12,6 +12,7 @@ class Song(DBBase):
     writer = Column(String(255), nullable=False)
     
     words = relationship('Word', secondary=word_position.WordPosition.__table__, backref='songs')
+    
 
 
     def __init__(self, name, writer):

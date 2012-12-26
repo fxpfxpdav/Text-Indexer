@@ -64,7 +64,7 @@ class FileImporter(object):
         session.commit()
         
 if __name__ == '__main__':
-#    FileImporter().import_file("some nights", "Fun", r"c:\some_nights.txt")
+#    FileImporter().import_file("Call Me Maybe", "Carly Rae Jepsen", r"C:\text\text_indexer\songs\call_me_maybe.txt")
     song = session.query(Song).first()
     song.get_stanza(2)
         

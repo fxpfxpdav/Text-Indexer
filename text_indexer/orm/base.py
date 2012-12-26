@@ -11,8 +11,9 @@ session = None
 
 def connect():
     global session, engine
-    engine = create_engine('mysql+mysqldb://root:root@localhost:3306/text_indexer')
-    engine.echo=True
+#    engine = create_engine('mysql+mysqldb://root:root@localhost:3306/text_indexer')
+    engine = create_engine('mysql+mysqldb://root:root@10.0.0.129:3306/text_indexer')
+#    engine.echo=True
     engine.connect()
     print engine.execute('select * from tttt').fetchall()
     from sqlalchemy.orm import sessionmaker
