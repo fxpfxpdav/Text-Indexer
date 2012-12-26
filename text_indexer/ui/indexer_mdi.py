@@ -6,6 +6,8 @@ import pickle
 import os
 from text_indexer.ui.manage_songs_panel import ManageSongsPanel
 from text_indexer.ui.analysis_panel import AnalysisPanel
+from text_indexer.ui.words_index_panel import WordsIndexPanel
+from text_indexer.ui.statistics_panel import StatisticsPanel
 try:
     from agw import pybusyinfo as PBI
 except ImportError: # if it's not there locally, try the wxPython lib.
@@ -34,6 +36,12 @@ class ParentFrame(wx.aui.AuiMDIParentFrame):
         
         item = menu.Append(-1, "Text analysis\tCtrl-T")
         self.Bind(wx.EVT_MENU, self.OnTextAnalysis, item)
+        
+        item = menu.Append(-1, "Words index\tCtrl-W")
+        self.Bind(wx.EVT_MENU, self.OnWordsIndex, item)
+        
+        item = menu.Append(-1, "Statistics\tCtrl-S")
+        self.Bind(wx.EVT_MENU, self.OnStatistics, item)
              
         item = menu.Append(-1, "Close")
         self.Bind(wx.EVT_MENU, self.OnDoClose, item)
@@ -49,8 +57,17 @@ class ParentFrame(wx.aui.AuiMDIParentFrame):
     def OnTextAnalysis(self, evt):
         self.count += 1
         child = ChildFrame(self, self.count, "Analysis text", AnalysisPanel)
-        child.Show()    
-     
+        child.Show()
+        
+    def OnWordsIndex(self, evt):
+        self.count += 1
+        child = ChildFrame(self, self.count, "Words index", WordsIndexPanel)
+        child.Show()
+        
+    def OnStatistics(self, evt):  
+        self.count += 1
+        child = ChildFrame(self, self.count, "Statistics", StatisticsPanel)
+        child.Show()
 
     def OnDoClose(self, evt):
         # Close all ChildFrames first else Python crashes
