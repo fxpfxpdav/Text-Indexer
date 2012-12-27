@@ -10,6 +10,7 @@ class ManageSongsPanel(wx.Panel):
         wx.Panel.__init__(self, parent, -1)
         
     
+        full_sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         
         text = "Songs List"
@@ -25,11 +26,19 @@ class ManageSongsPanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnAddSong, btn1) 
         
         btn2 = wx.Button(self, -1, "Remove song", (300, 210))
-        self.Bind(wx.EVT_BUTTON, self.OnRemoveSong, btn2) 
+        self.Bind(wx.EVT_BUTTON, self.OnRemoveSong, btn2)
+        
+        btn3 = wx.Button(self, -1, "Show song", (300, 270))
+        self.Bind(wx.EVT_BUTTON, self.showSong, btn3)  
          
         sizer.Add(self.lb1, 0)
-        sizer.Add(btn1, 0)
-        sizer.Add(btn2, 0)
+        sizer.Add(btn1, 1)
+        sizer.Add(btn2, 2)
+        sizer.Add(btn3, 3)
+        
+        self.song_text = wx.StaticText(self, -1, "Song Words", (300, 300))
+        full_sizer.Add(sizer,0, wx.ALIGN_LEFT)
+        full_sizer.Add(self.song_text,1, wx.ALIGN_RIGHT)
         
         #self.SetSizer(sizer)
         
@@ -40,6 +49,13 @@ class ManageSongsPanel(wx.Panel):
             song = Song.get_songs(name=self.lb1.Items[selection])[0]
             self.lb1.Delete(selection)
             delete_song(song)
+            
+    def showSong(self, evt):
+        selection = self.lb1.GetSelection()
+        if selection != -1:
+            song = Song.get_songs(name=self.lb1.Items[selection])[0]
+            self.song_text = wx.StaticText(self, -1, song.get_text(), (300, 300))
+
         
     def OnAddSong(self, evt):
         useMetal = False

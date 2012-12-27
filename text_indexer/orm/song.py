@@ -28,6 +28,25 @@ class Song(DBBase):
         wps = session.query(WordPosition).filter_by(song_id=self.id, stanza_number=stanza_number).order_by(WordPosition.stanza_line_number,WordPosition.row_word_number).all()
         words = [wp.word.word for wp in wps]
         return words
+    
+    def get_text(self):
+        from text_indexer.orm.base import session
+        from text_indexer.orm.word_position import WordPosition
+        wps = session.query(WordPosition).filter_by(song_id=self.id).order_by(WordPosition.line_number,WordPosition.row_word_number).all()
+        song = ''
+        stanza_number=1
+        stanza_line_number=1
+        for w in wps:
+            if w.stanza_number > stanza_number:
+                stanza_number+=1
+                song+='\n\n'
+                stanza_line_number=1
+            if w.stanza_line_number > stanza_line_number:
+                song+='\n'
+                stanza_line_number+=1
+            song+=w.word.word + ' '
+
+        return song
         
     @staticmethod
     def get_songs(name="", writer="", word=""):
