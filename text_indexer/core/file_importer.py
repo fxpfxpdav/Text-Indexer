@@ -35,7 +35,7 @@ class FileImporter(object):
             rows = stanza.split("\n")
             for row in rows:
                 row_word_number = 1
-                words = re.findall(r'\w+', row)
+                words = re.findall(r'(\b[^\s]+\b)', row)
                 for word in words:
                     self._create_word_in_DB(word, db_song, stanza_number, row_word_number, 
                                             line_number, stanza_line_number)
