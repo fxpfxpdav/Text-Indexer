@@ -1,5 +1,6 @@
 import wx
 import os
+import re
 from text_indexer.orm.song import Song
 
 class AnalysisPanel(wx.Panel):
@@ -21,9 +22,8 @@ class AnalysisPanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.wordChosen, btn2) 
         
         self.t3 = wx.TextCtrl(self, -1,
-                        "Here is a looooooooooooooong line of text set in the control.\n\n"
-                        "The quick brown fox jumped over the lazy dog...", (850, 50),
-                       size=(400, 400), style=wx.TE_MULTILINE|wx.TE_PROCESS_ENTER)
+                        "", (850, 50),
+                       size=(400, 400), style=wx.TE_MULTILINE|wx.TE_RICH2)
         
     def songChosen(self, evt):
         self.lb2.Clear()
@@ -49,7 +49,10 @@ class AnalysisPanel(wx.Panel):
                     wps.add((wp.song.id, wp.stanza_number))
                     text+= wp.song.get_stanza(wp.stanza_number)
                     text+= '\n\n\n'
-        self.t3.Clear()
-        self.t3.AppendText(text)
+        
+        self.t3.SetValue(text)
+        self.t3.SetScrollPos(1,1)
+        for m in re.finditer(" " + word.word, text ):
+            self.t3.SetStyle(m.start()+1, m.end(), wx.TextAttr("RED", "YELLOW"))
                         
         
