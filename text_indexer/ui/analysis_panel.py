@@ -21,8 +21,7 @@ class AnalysisPanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.wordChosen, btn2) 
         
         self.t3 = wx.TextCtrl(self, -1,
-                        "Here is a looooooooooooooong line of text set in the control.\n\n"
-                        "The quick brown fox jumped over the lazy dog...", (850, 50),
+                        "Choose a word from the songs.\n\n", (850, 50),
                        size=(400, 400), style=wx.TE_MULTILINE|wx.TE_PROCESS_ENTER)
         
     def songChosen(self, evt):
