@@ -1,18 +1,12 @@
 
 import wx
 import wx.aui
-import wx.lib.platebtn as pbtn
-import pickle
-import os
 from text_indexer.ui.manage_songs_panel import ManageSongsPanel
 from text_indexer.ui.analysis_panel import AnalysisPanel
 from text_indexer.ui.words_index_panel import WordsIndexPanel
 from text_indexer.ui.statistics_panel import StatisticsPanel
 from text_indexer.ui.search_panel import SearchPanel
-try:
-    from agw import pybusyinfo as PBI
-except ImportError: # if it's not there locally, try the wxPython lib.
-    import wx.lib.agw.pybusyinfo as PBI
+from text_indexer.ui.expressions_panel import ExpressionsPanel
 
 
 #----------------------------------------------------------------------
@@ -41,6 +35,9 @@ class ParentFrame(wx.aui.AuiMDIParentFrame):
         item = menu.Append(-1, "Text analysis\tCtrl-A")
         self.Bind(wx.EVT_MENU, self.OnTextAnalysis, item)
         
+        item = menu.Append(-1, "Expressions\tCtrl-A")
+        self.Bind(wx.EVT_MENU, self.OnExpressions, item)
+        
         item = menu.Append(-1, "Words index\tCtrl-W")
         self.Bind(wx.EVT_MENU, self.OnWordsIndex, item)
         
@@ -55,6 +52,11 @@ class ParentFrame(wx.aui.AuiMDIParentFrame):
     def OnManageSongs(self, evt):
         self.count += 1
         child = ChildFrame(self, self.count, "Manage songs", ManageSongsPanel)
+        child.Show()
+
+    def OnExpressions(self, evt):
+        self.count += 1
+        child = ChildFrame(self, self.count, "Expressions", ExpressionsPanel)
         child.Show()
         
     def OnSearch(self, evt):
