@@ -36,9 +36,12 @@ class ManageSongsPanel(wx.Panel):
         sizer.Add(btn2, 2)
         sizer.Add(btn3, 3)
         
-        self.song_text = wx.StaticText(self, -1, "Song Words", (300, 300))
+        self.song_text_headline = wx.StaticText(self, -1, "The Song", (600, 50))
+        font = wx.Font(12, wx.SWISS, wx.NORMAL, wx.NORMAL)
+        self.song_text_headline.SetFont(font)
+        self.t3 = wx.TextCtrl(self, -1, "", (600, 100), size=(500, 400), style=wx.TE_MULTILINE|wx.TE_READONLY)#|wx.TE_PROCESS_ENTER)
         full_sizer.Add(sizer,0, wx.ALIGN_LEFT)
-        full_sizer.Add(self.song_text,1, wx.ALIGN_RIGHT)
+        full_sizer.Add(self.song_text_headline,1, wx.ALIGN_RIGHT)
         
         #self.SetSizer(sizer)
         
@@ -54,7 +57,9 @@ class ManageSongsPanel(wx.Panel):
         selection = self.lb1.GetSelection()
         if selection != -1:
             song = Song.get_songs(name=self.lb1.Items[selection])[0]
-            self.song_text = wx.StaticText(self, -1, song.get_text(), (300, 300))
+            self.t3.SetValue(song.get_text())
+            self.t3.SetScrollPos(1,1)
+            #self.song_text = wx.StaticText(self, -1, song.get_text(), (500, 50))
 
         
     def OnAddSong(self, evt):
