@@ -7,20 +7,30 @@ from text_indexer.orm.word import Word
 from text_indexer.orm.word_position import WordPosition
 
 class FileImporter(object):
+    """
+    This class imports and exports the db from and into files.
+    """
     
-    def __init__(self):
-        pass
     
-    
-    def import_file(self, name, writer, path):
+    def import_file(self, name, writer, performer, path):
+        """
+        @param name: The name of the song
+        @param writer: The song writer.
+        @param path: The path of the song.
+        """
         db_song = session.query(Song).filter_by(name=name).first()
         if not db_song: 
-            db_song = Song(name=name,writer=writer)
+            db_song = Song(name=name,writer=writer, performer=performer)
             session.add(db_song)
         self.load_file_into_song(path, db_song)
         
     
     def load_file_into_song(self, path, db_song):
+        """
+        This function loads the song into the db
+        @param path: The path of the song
+        @param db_song: The instance of the song in the db
+        """
         f = open(path, "r")
         text = f.read()
         f.close()
@@ -39,12 +49,12 @@ class FileImporter(object):
                 for word in words:
                     self._create_word_in_DB(word, db_song, stanza_number, row_word_number, 
                                             line_number, stanza_line_number)
-                    print "Add word %s to song %s" % (word, db_song.name)
-                    print "line", line_number
-                    print "stanza", stanza_number
-                    print "line number in stanza", stanza_line_number 
-                    print "word number in row", row_word_number
-                    print "="*30 
+#                    print "Add word %s to song %s" % (word, db_song.name)
+#                    print "line", line_number
+#                    print "stanza", stanza_number
+#                    print "line number in stanza", stanza_line_number 
+#                    print "word number in row", row_word_number
+#                    print "="*30 
                     
                     row_word_number += 1
 

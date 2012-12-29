@@ -23,6 +23,7 @@ class AddSongDialog(wx.Dialog):
         
         self.name = ""
         self.writer = ""
+        self.performer = ""
         self.path = ""
         self.parent = parent
 
@@ -73,6 +74,13 @@ class AddSongDialog(wx.Dialog):
 
         self.writer_text = wx.TextCtrl(self, -1, "", size=(80,-1))
         box.Add(self.writer_text, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
+        
+        label = wx.StaticText(self, -1, "Song Performer")
+        box.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
+
+        self.performer_text = wx.TextCtrl(self, -1, "", size=(80,-1))
+        box.Add(self.performer_text, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
+
 
         sizer.Add(box, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
         
@@ -107,9 +115,10 @@ class AddSongDialog(wx.Dialog):
         
         name = self.name_text.Value
         writer = self.writer_text.Value
+        performer = self.performer_text.Value
         path = self.path
         
-        FileImporter().import_file(name, writer, path)
+        FileImporter().import_file(name, writer, performer, path)
         self.parent.lb1.Append(name)
         evt.EventObject.Parent.Destroy()
 

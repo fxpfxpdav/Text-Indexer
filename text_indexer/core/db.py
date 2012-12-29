@@ -34,6 +34,9 @@ import lxml.etree
 table_order = ['songs', 'words', 'word_positions','groups', 'relations']
 
 def sort_tables(x,y):
+    """
+        This method sorts the tables, so that tables with dependecies will be exported in the rifht place
+    """
     x = x['table_name']
     y = y['table_name']
     if x in table_order:
@@ -49,79 +52,89 @@ def sort_tables(x,y):
     pass
 
 def export_db(path):
+    """
+    This method exports the db to a xml file
+    @param path: The path to save the db in.
+    """
     cursor = create_cursor()
+    
+    # select all of the tables from the db
     cursor.execute("SELECT table_name, table_type, engine FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND engine = 'InnoDB'")
     tables = cursor.fetchall()
     tables = [x for x in tables]
+    #sort the tables by dependencies.
     tables.sort(cmp=sort_tables)
-    try:
-        f = open(path,'wb')
-    except Exception():
-        return
+    #create the output.
     output=""
-    output += ('<?xml version="1.0"?>\n')#encoding="UTF-16"?>\n')
+    output += ('<?xml version="1.0"?>\n')
     output += ('\t<tables>\n')
     for i in tables:
+        # save the tables in the  file.
         table = i['table_name']
         output += ('\t\t<table name="%s">\n' % table)
         cursor.execute("SELECT * FROM %s" %table)
-        res = cursor.fetchall()
-        for row in res:
-            output += ('\t\t\t<row>\n')
-            for key in row.keys():
-                
-                #solve the utf problem. try to solve it another way.
-                
-                try:
-                    for i in row[key]:
-                        if ord(i) >= 128:
-                            row[key] = "UTF8"
-                            break
-                except:
-                    pass
-                
-                output += ('\t\t\t\t<%s>%s</%s>\n' % (key, str(row[key]),key))
-            output += ('\t\t\t</row>\n')
+        results = cursor.fetchall()
+        for result in results:
+            output += ('\t\t\t<result>\n')
+            for key in result.keys():
+                output += ('\t\t\t\t<%s>%s</%s>\n' % (key, str(result[key]),key))
+            output += ('\t\t\t</result>\n')
         output += ('\t\t</table>\n')
     output += ('\t</tables>\n')
+    
+    #save the output to a file
+    f = open(path,'wb')
     f.write(output)
     f.close()
 
 def import_db(path):
+    """
+    This method imports the db from a xml file
+    @param path: The path of the saved db.
+    """
     cursor = create_cursor()
-    input_xml = open(path,'rb').read()
-    xml = lxml.etree.fromstring(input_xml)
-    #root = xml.getroot()
-    root = xml
-    tables = root.iterchildren()
+    
+    #read the file and parse the xml
+    input_xml_file = open(path,'rb').read()
+    root_xml = lxml.etree.fromstring(input_xml_file)
+    tables = root_xml.iterchildren()
     for table in tables:
         table_name = table.attrib['name']
-        rows = table.iterchildren()
-        for row in rows:
-            keys = row.iterchildren()
-            keys_names = []
+        results = table.iterchildren()
+        for result in results:
+            keys = result.iterchildren()
+            key_names = []
             values = []
             for key in keys:            
-                keys_names.append(key.tag)
+                key_names.append(key.tag)
                 values.append(key.text)
+                
+            #insert the data
             query = "INSERT INTO %s (" %table_name
-            for key in keys_names[:-1]:
+            
+            #add the keys
+            for key in key_names[:-1]:
                 query += key + ","
-            query += keys_names[-1] + ")"
+            query += key_names[-1] + ")"
             query += " VALUES ("
+            
+            #add the values
             for value in values:
                 if isinstance(value,str):
                     query += '"%s"' % value + ','
                 else:
                     query += "%d" %value + ','
             query = query[:-1] + ')'
+            #run the query
             cursor.execute(query)
 
+    # commit the results into the db.
     cursor.connection.commit()
 
-    pass
-
 def create_cursor():
+    """
+    This method creats a connector to the db.
+    """
     con = MySQLdb.Connection(host = '10.0.0.129', user = 'root', 
                            passwd = 'root' , db = 'text_indexer')
     cursor = con.cursor(MySQLdb.cursors.DictCursor)
