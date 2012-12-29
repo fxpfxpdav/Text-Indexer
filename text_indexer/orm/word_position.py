@@ -13,6 +13,7 @@ class WordPosition(DBBase):
     row_word_number = Column('row_word_number', Integer, nullable=False)
     stanza_number = Column('stanza_number', Integer, nullable=False)
     line_number = Column('line_number', Integer, nullable=False)
+    number_in_song = Column('number_in_song', Integer, nullable=False)
     stanza_line_number = Column('stanza_line_number', Integer, nullable=False)
     
     word = relationship('Word', backref='word_positions')
@@ -20,13 +21,14 @@ class WordPosition(DBBase):
     
     
 
-    def __init__(self, word, song, row_word_number, stanza_number, line_number, stanza_line_number):
+    def __init__(self, word, song, row_word_number, stanza_number, line_number, stanza_line_number, number_in_song):
         self.word = word
         self.song = song
         self.row_word_number = row_word_number
         self.stanza_number = stanza_number
         self.line_number = line_number
         self.stanza_line_number = stanza_line_number
+        self.number_in_song = number_in_song
     
     def __repr__(self):
         return "WordPosition(Word(%r) in Song(%r) line(%d), word(%d))" % (self.word.word, self.song.name, self.line_number, self.row_word_number)

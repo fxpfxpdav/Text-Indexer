@@ -43,6 +43,7 @@ class FileImporter(object):
         stanzas = text.split("\n\n")
         rows = 1
         line_number = 1
+        number_in_song = 1
         for stanza_number, stanza in enumerate(stanzas):
             
             stanza_line_number = 1
@@ -52,7 +53,7 @@ class FileImporter(object):
                 words = re.findall(r'(\b[^\s]+\b)', row)
                 for word in words:
                     self._create_word_in_DB(word, db_song, stanza_number, row_word_number, 
-                                            line_number, stanza_line_number)
+                                            line_number, stanza_line_number, number_in_song)
 #                    print "Add word %s to song %s" % (word, db_song.name)
 #                    print "line", line_number
 #                    print "stanza", stanza_number
@@ -61,6 +62,7 @@ class FileImporter(object):
 #                    print "="*30 
                     
                     row_word_number += 1
+                    number_in_song+=1
 
                 stanza_line_number += 1
                 line_number += 1
@@ -73,7 +75,7 @@ class FileImporter(object):
         session.commit()
         
         
-    def _create_word_in_DB(self, word, db_song, stanza_number, row_word_number, line_number, stanza_line_number):
+    def _create_word_in_DB(self, word, db_song, stanza_number, row_word_number, line_number, stanza_line_number, number_in_song):
         db_word = session.query(Word).filter_by(word=word).first()
         if not db_word:
             if word in self.words_to_add.keys():
@@ -81,7 +83,7 @@ class FileImporter(object):
             else:
                 self.words_to_add[word] = Word(word=word) 
             
-        word_position = WordPosition(word=db_word, song=db_song, row_word_number=row_word_number, stanza_number=stanza_number, line_number=line_number, stanza_line_number=stanza_line_number)
+        word_position = WordPosition(word=db_word, song=db_song, row_word_number=row_word_number, stanza_number=stanza_number, line_number=line_number, stanza_line_number=stanza_line_number, number_in_song=number_in_song)
         self.word_positions.append(word_position)
         
 if __name__ == '__main__':

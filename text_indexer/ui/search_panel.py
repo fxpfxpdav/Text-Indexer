@@ -1,6 +1,7 @@
 import wx
 import os
 from text_indexer.orm.song import Song
+from text_indexer.orm.word_position import WordPosition
 
 
 
@@ -21,7 +22,7 @@ class SearchPanel(wx.Panel):
         text.SetFont(font)
         
         songList = [s.name for s in Song.get_songs()]
-        self.lb1 = wx.ListBox(self, 60, wx.DefaultPosition, (200, 400), songList, wx.LB_EXTENDED)
+        self.lb1 = wx.ListBox(self, 60, wx.DefaultPosition, (200, 400), songList, wx.LB_SINGLE)
         
         song_sizer.AddSpacer(20)
         song_sizer.Add(text)
@@ -39,9 +40,10 @@ class SearchPanel(wx.Panel):
         o_sizer3 = wx.BoxSizer(wx.VERTICAL)
         
         self.group1_ctrls = []
-        radio1 = wx.RadioButton(self, -1, " Word number  " )
-        radio2 = wx.RadioButton(self, -1, " Paragraph    " )
-        radio3 = wx.RadioButton(self, -1, " Line         " )
+        self.radio1 = wx.RadioButton(self, -1, " Word number  " )
+        self.radio2 = wx.RadioButton(self, -1, " Paragraph    " )
+        self.radio3 = wx.RadioButton(self, -1, " Line         " )
+        self.radio_selected = self.radio1
         
         l1 = wx.StaticText(self, -1, "Number in song")
         text1 = wx.TextCtrl( self, -1, "" )
@@ -71,9 +73,9 @@ class SearchPanel(wx.Panel):
         o_sizer3.AddSpacer(5)
         o_sizer3.Add(text3_2)
         
-        self.group1_ctrls.append((radio1, [text1], o_sizer1))
-        self.group1_ctrls.append((radio2, [text2_1, text2_2], o_sizer2))
-        self.group1_ctrls.append((radio3, [text3_1, text3_2], o_sizer3))
+        self.group1_ctrls.append((self.radio1, [text1], o_sizer1))
+        self.group1_ctrls.append((self.radio2, [text2_1, text2_2], o_sizer2))
+        self.group1_ctrls.append((self.radio3, [text3_1, text3_2], o_sizer3))
         
         for radio, text_group, o_sizer in self.group1_ctrls:
             grid1.Add( radio, 0, wx.ALIGN_LEFT|wx.LEFT|wx.RIGHT|wx.TOP, 5 )
@@ -85,20 +87,20 @@ class SearchPanel(wx.Panel):
                 
         
         btn1 = wx.Button(self, -1, "Search", (700, 275))
-        self.Bind(wx.EVT_BUTTON, self.OnSearch, btn1) 
+        self.Bind(wx.EVT_BUTTON, self.onSearch, btn1) 
         
         
-        text_result = "result"
-        text_result = wx.StaticText(self, -1, text_result, (100,20))
+        self.text_result = "result"
+        self.text_result = wx.StaticText(self, -1, self.text_result, (100,20))
         font = wx.Font(14, wx.SWISS, wx.NORMAL, wx.NORMAL)
-        text_result.SetFont(font)
+        self.text_result.SetFont(font)
         
-        word_text = wx.TextCtrl(self, -1, "", size=(125, -1))
+        self.word_text = wx.TextCtrl(self, -1, "", size=(125, -1))
         
         result_sizer.AddSpacer(250)
-        result_sizer.Add(text_result)
+        result_sizer.Add(self.text_result)
         result_sizer.AddSpacer(10)
-        result_sizer.Add(word_text)
+        result_sizer.Add(self.word_text)
         
         
         box1.Add( grid1, 0, wx.ALIGN_CENTRE|wx.ALL, 5 )
@@ -123,11 +125,20 @@ class SearchPanel(wx.Panel):
             if radio is radio_selected:
                 for text in text_group:
                     text.Enable(True)
+                self.radio_selected = radio
             else:
                 for text in text_group:
                     text.Enable(False)
         
-    def OnSearch(self, evt):
+    def onSearch(self, evt):
+        from text_indexer.orm.base import session
+        song_name = self.lb1.Items[self.lb1.GetSelection()]
+        song = Song.get_songs(name=song_name)[0]
+        self.word_text.Value = song.name
+        query = session.query(WordPosition)
+        query = query.join(Song).filter(song=song)
+        if self.radio_selected == self.radio1:
+            query = query.filter_by()
         pass
     
         
