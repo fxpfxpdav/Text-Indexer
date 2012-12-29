@@ -112,10 +112,10 @@ class ManageSongsPanel(wx.Panel):
             path = dlg.GetPath()
             import_db(path)
             
-        session.close_all()
-        song_list = [s.name for s in Song.get_songs()]
-        for s in song_list:
-            self.lb1.Append(s)
+            session.close_all()
+            song_list = [s.name for s in Song.get_songs()]
+            for s in song_list:
+                self.lb1.Append(s)
             
         dlg.Destroy()
             
