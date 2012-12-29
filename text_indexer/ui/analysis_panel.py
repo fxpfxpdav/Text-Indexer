@@ -2,6 +2,7 @@ import wx
 import os
 import re
 from text_indexer.orm.song import Song
+from text_indexer.orm.word import Word
 
 class AnalysisPanel(wx.Panel):
     
@@ -25,6 +26,9 @@ class AnalysisPanel(wx.Panel):
         self.t3 = wx.TextCtrl(self, -1,
                         "", (850, 50),
                        size=(400, 400), style=wx.TE_MULTILINE|wx.TE_RICH2)
+        
+        btn2 = wx.Button(self, -1, "Search Phrase", (850, 500))
+        self.Bind(wx.EVT_BUTTON, self.phraseChosen, btn2) 
         
     def songChosen(self, evt):
         self.lb2.Clear()
@@ -55,6 +59,42 @@ class AnalysisPanel(wx.Panel):
         self.t3.SetValue(text)
         self.t3.SetScrollPos(1,1)
         for m in re.finditer(" " + word.word, text ):
+            self.t3.SetStyle(m.start()+1, m.end(), wx.TextAttr("RED", "YELLOW"))
+            
+    
+    def phraseChosen(self, evt):
+        from text_indexer.orm.base import session
+        text = self.t3.GetValue()
+        start,end = self.t3.GetSelection()
+        selected = text[start:end]
+        words = selected.replace('\n',' ').strip().replace('  ', ' ').split(' ')
+        matches = set()
+        number_of_words = len(words)
+        word = session.query(Word).filter_by(word=words[0])[0]
+        wps = word.word_positions
+        for w in wps:
+            i = 1
+            wp = w.get_next_word()
+            while i < number_of_words and wp.word.word == words[i]:
+                i+=1
+                wp = wp.get_next_word()
+            if i == number_of_words:
+                matches.add(w)
+        
+            
+        wps = set()
+        text = ''
+        for wp in matches:
+            if wp.song in self.songs:
+                if (wp.song.id, wp.stanza_number) not in wps:
+                    wps.add((wp.song.id, wp.stanza_number))
+                    text+= wp.song.get_stanza(wp.stanza_number)
+                    text+= '\n\n\n'
+#        
+#        self.t3.SetValue(str(words))
+        self.t3.SetValue(text)
+        self.t3.SetScrollPos(1,1)
+        for m in re.finditer(" " + selected, text):
             self.t3.SetStyle(m.start()+1, m.end(), wx.TextAttr("RED", "YELLOW"))
                         
         

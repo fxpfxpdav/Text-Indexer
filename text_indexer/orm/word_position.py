@@ -29,6 +29,10 @@ class WordPosition(DBBase):
         self.line_number = line_number
         self.stanza_line_number = stanza_line_number
         self.number_in_song = number_in_song
+        
+    def get_next_word(self):
+        from text_indexer.orm.base import session
+        return session.query(WordPosition).filter_by(song_id=self.song_id, number_in_song=self.number_in_song+1).first()
     
     def __repr__(self):
         return "WordPosition(Word(%r) in Song(%r) line(%d), word(%d))" % (self.word.word, self.song.name, self.line_number, self.row_word_number)
