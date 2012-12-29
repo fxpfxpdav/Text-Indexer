@@ -84,6 +84,10 @@ class SearchPanel(wx.Panel):
                 text.Enable(False)
                 
         
+        btn1 = wx.Button(self, -1, "Search", (700, 275))
+        self.Bind(wx.EVT_BUTTON, self.OnSearch, btn1) 
+        
+        
         text_result = "result"
         text_result = wx.StaticText(self, -1, text_result, (100,20))
         font = wx.Font(14, wx.SWISS, wx.NORMAL, wx.NORMAL)
@@ -123,5 +127,8 @@ class SearchPanel(wx.Panel):
                 for text in text_group:
                     text.Enable(False)
         
+    def OnSearch(self, evt):
+        pass
+    
         
         
