@@ -14,8 +14,8 @@ def connect():
     This method connects to the db.
     """
     global session, engine
-#    engine = create_engine('mysql+mysqldb://root:root@localhost:3306/text_indexer')
-    engine = create_engine('mysql+mysqldb://root:root@10.0.0.129:3306/text_indexer')
+    engine = create_engine('mysql+mysqldb://root:root@localhost:3306/text_indexer')
+    #engine = create_engine('mysql+mysqldb://root:root@10.0.0.129:3306/text_indexer')
 #    engine.echo=True
     engine.connect()
     from sqlalchemy.orm import sessionmaker
