@@ -13,6 +13,7 @@ class FileImporter(object):
     
     def __init__(self):
         self.word_positions = []
+        self.words_to_add = {}
     
     
     def import_file(self, name, writer, performer, path):
@@ -64,6 +65,9 @@ class FileImporter(object):
                 stanza_line_number += 1
                 line_number += 1
                 
+        for word in self.words_to_add.values():
+            session.add(word)
+        session.commit()
         for word_position in self.word_positions:
             session.add(word_position)
         session.commit()
@@ -72,9 +76,10 @@ class FileImporter(object):
     def _create_word_in_DB(self, word, db_song, stanza_number, row_word_number, line_number, stanza_line_number):
         db_word = session.query(Word).filter_by(word=word).first()
         if not db_word:
-            db_word = Word(word=word)
-            session.add(db_word)
-            session.commit()
+            if word in self.words_to_add.keys():
+                db_word = self.words_to_add[word]
+            else:
+                self.words_to_add[word] = Word(word=word) 
             
         word_position = WordPosition(word=db_word, song=db_song, row_word_number=row_word_number, stanza_number=stanza_number, line_number=line_number, stanza_line_number=stanza_line_number)
         self.word_positions.append(word_position)
