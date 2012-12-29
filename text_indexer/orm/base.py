@@ -15,7 +15,6 @@ def connect():
     engine = create_engine('mysql+mysqldb://root:root@10.0.0.129:3306/text_indexer')
 #    engine.echo=True
     engine.connect()
-    print engine.execute('select * from tttt').fetchall()
     from sqlalchemy.orm import sessionmaker
     Session = sessionmaker(bind=engine)
     session = Session()
