@@ -158,7 +158,6 @@ class SearchPanel(wx.Panel):
             if not self.word_text.Value:
                 self.word_text.Value = 'No word found'
         except Exception, e:
-            raise e
             self.word_text.Value = 'No word found'
         
         
