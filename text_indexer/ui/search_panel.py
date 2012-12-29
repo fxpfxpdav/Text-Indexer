@@ -23,6 +23,7 @@ class SearchPanel(wx.Panel):
         
         songList = [s.name for s in Song.get_songs()]
         self.lb1 = wx.ListBox(self, 60, wx.DefaultPosition, (200, 400), songList, wx.LB_SINGLE)
+        self.lb1.SetSelection(0)
         
         song_sizer.AddSpacer(20)
         song_sizer.Add(text)
@@ -41,41 +42,48 @@ class SearchPanel(wx.Panel):
         
         self.group1_ctrls = []
         self.radio1 = wx.RadioButton(self, -1, " Word number  " )
-        self.radio2 = wx.RadioButton(self, -1, " Paragraph    " )
-        self.radio3 = wx.RadioButton(self, -1, " Line         " )
+        self.radio2 = wx.RadioButton(self, -1, " Line    " )
+        self.radio3 = wx.RadioButton(self, -1, " Paragraph         " )
         self.radio_selected = self.radio1
         
         l1 = wx.StaticText(self, -1, "Number in song")
-        text1 = wx.TextCtrl( self, -1, "" )
+        self.text1 = wx.TextCtrl( self, -1, "" )
+        self.text1.Value = '1'
         o_sizer1.Add(l1)
         o_sizer1.AddSpacer(5)
-        o_sizer1.Add(text1)
+        o_sizer1.Add(self.text1)
         
         l2_1 = wx.StaticText(self, -1, "Line number")
         l2_2 = wx.StaticText(self, -1, "Number in line")
-        text2_1 = wx.TextCtrl( self, -1, "" )
-        text2_2 = wx.TextCtrl( self, -1, "" )
+        self.text2_1 = wx.TextCtrl( self, -1, "" )
+        self.text2_2 = wx.TextCtrl( self, -1, "" )
+        self.text2_1.Value = '1'
+        self.text2_2.Value = '1'
+        
         o_sizer2.Add(l2_1)
         o_sizer2.AddSpacer(5)
-        o_sizer2.Add(text2_1)
+        o_sizer2.Add(self.text2_1)
         o_sizer2.Add(l2_2)
         o_sizer2.AddSpacer(5)
-        o_sizer2.Add(text2_2)
+        o_sizer2.Add(self.text2_2)
         
         l3_1 = wx.StaticText(self, -1, "Paragraph number")
         l3_2 = wx.StaticText(self, -1, "Number in paragraph")
-        text3_1 = wx.TextCtrl( self, -1, "" )
-        text3_2 = wx.TextCtrl( self, -1, "" )
+        self.text3_1 = wx.TextCtrl( self, -1, "" )
+        self.text3_2 = wx.TextCtrl( self, -1, "" )
+        self.text3_1.Value = '1'
+        self.text3_2.Value = '1'
+        
         o_sizer3.Add(l3_1)
         o_sizer3.AddSpacer(5)
-        o_sizer3.Add(text3_1)
+        o_sizer3.Add(self.text3_1)
         o_sizer3.Add(l3_2)
         o_sizer3.AddSpacer(5)
-        o_sizer3.Add(text3_2)
+        o_sizer3.Add(self.text3_2)
         
-        self.group1_ctrls.append((self.radio1, [text1], o_sizer1))
-        self.group1_ctrls.append((self.radio2, [text2_1, text2_2], o_sizer2))
-        self.group1_ctrls.append((self.radio3, [text3_1, text3_2], o_sizer3))
+        self.group1_ctrls.append((self.radio1, [self.text1], o_sizer1))
+        self.group1_ctrls.append((self.radio2, [self.text2_1, self.text2_2], o_sizer2))
+        self.group1_ctrls.append((self.radio3, [self.text3_1, self.text3_2], o_sizer3))
         
         for radio, text_group, o_sizer in self.group1_ctrls:
             grid1.Add( radio, 0, wx.ALIGN_LEFT|wx.LEFT|wx.RIGHT|wx.TOP, 5 )
@@ -131,15 +139,26 @@ class SearchPanel(wx.Panel):
                     text.Enable(False)
         
     def onSearch(self, evt):
-        from text_indexer.orm.base import session
-        song_name = self.lb1.Items[self.lb1.GetSelection()]
-        song = Song.get_songs(name=song_name)[0]
-        self.word_text.Value = song.name
-        query = session.query(WordPosition)
-        query = query.join(Song).filter(song=song)
-        if self.radio_selected == self.radio1:
-            query = query.filter_by()
-        pass
-    
+        try:
+            from text_indexer.orm.base import session
+            song_name = self.lb1.Items[self.lb1.GetSelection()]
+            song = Song.get_songs(name=song_name)[0]
+            query = session.query(WordPosition).filter_by(song_id=song.id)
+            if self.radio_selected == self.radio1:
+                query = query.filter_by(number_in_song=self.text1.Value)
+                wp = query.first()
+                self.word_text.Value = wp.word.word
+            elif self.radio_selected == self.radio2:
+                query = query.filter_by(line_number=self.text2_1.Value, row_word_number=self.text2_2.Value)
+                wp = query.first()
+                self.word_text.Value = wp.word.word
+            elif self.radio_selected == self.radio3:
+                stanza = song.get_stanza(int(self.text3_1.Value))
+                self.word_text.Value = stanza.split(' ')[int(self.text3_2.Value)]
+            if not self.word_text.Value:
+                self.word_text.Value = 'No word found'
+        except Exception, e:
+            raise e
+            self.word_text.Value = 'No word found'
         
         

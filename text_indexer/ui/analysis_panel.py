@@ -12,6 +12,7 @@ class AnalysisPanel(wx.Panel):
         
         songList = [s.name for s in Song.get_songs()]
         self.lb1 = wx.ListBox(self, 60, (100, 50), (200, 400), songList, wx.LB_EXTENDED)
+        self.lb1.SetSelection(0)
         
         btn1 = wx.Button(self, -1, "Show words", (350, 100))
         self.Bind(wx.EVT_BUTTON, self.songChosen, btn1) 
@@ -37,6 +38,7 @@ class AnalysisPanel(wx.Panel):
                 if word not in self.words:
                     self.words.append(word)
                     self.lb2.Append(word.word)
+        self.lb2.SetSelection(0)
                 
     def wordChosen(self, evt):
         text = ''

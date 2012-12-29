@@ -21,6 +21,7 @@ class ManageSongsPanel(wx.Panel):
         song_list = [s.name for s in Song.get_songs()]
         
         self.lb1 = wx.ListBox(self, 60, (100, 100), (150, 200), song_list, wx.LB_SINGLE)
+        self.lb1.SetSelection(0)
         
         btn1 = wx.Button(self, -1, "Import song", (300, 150))
         self.Bind(wx.EVT_BUTTON, self.OnAddSong, btn1) 
