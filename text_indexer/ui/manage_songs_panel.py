@@ -1,7 +1,7 @@
 import wx
 import os
 from text_indexer.ui.add_song import AddSongDialog
-from text_indexer.core.db import delete_song
+from text_indexer.core.db import delete_song, export_db, import_db, session
 from text_indexer.orm.song import Song
 
 class ManageSongsPanel(wx.Panel):
@@ -35,6 +35,12 @@ class ManageSongsPanel(wx.Panel):
         sizer.Add(btn1, 1)
         sizer.Add(btn2, 2)
         sizer.Add(btn3, 3)
+        
+        btn4 = wx.Button(self, -1, "Export DB", (50, 400))
+        self.Bind(wx.EVT_BUTTON, self.onExportDB, btn4)
+        
+        btn5 = wx.Button(self, -1, "Import DB", (150, 400))
+        self.Bind(wx.EVT_BUTTON, self.onImportDB, btn5)    
         
         self.song_text_headline = wx.StaticText(self, -1, "The Song", (600, 50))
         font = wx.Font(12, wx.SWISS, wx.NORMAL, wx.NORMAL)
@@ -77,29 +83,86 @@ class ManageSongsPanel(wx.Panel):
         # this does not return until the dialog is closed.
         val = dlg.ShowModal()
     
-        if val == wx.ID_OK:
-            self.log.WriteText("You pressed OK\n")
-        else:
-            self.log.WriteText("You pressed Cancel\n")
 
         dlg.Destroy()
     
-    def OnImportSong(self, evt):
+        
+    def onImportDB(self, evt):
+
+        # Create the dialog. In this case the current directory is forced as the starting
+        # directory for the dialog, and no default file name is forced. This can easilly
+        # be changed in your program. This is an 'open' dialog, and allows multitple
+        # file selections as well.
+        #
+        # Finally, if the directory is changed in the process of getting files, this
+        # dialog is set up to change the current working directory to the path chosen.
         dlg = wx.FileDialog(
-                            self, message="Choose a file",
-                            defaultDir=os.getcwd(), 
-                            defaultFile="",
-                            style=wx.OPEN | wx.CHANGE_DIR
-                            )
+            self, message="Choose a file",
+            defaultDir=os.getcwd(), 
+            defaultFile="",
+            wildcard='*.xml',
+            style=wx.OPEN | wx.CHANGE_DIR
+            )
 
         # Show the dialog and retrieve the user response. If it is the OK response, 
         # process the data.
         if dlg.ShowModal() == wx.ID_OK:
             # This returns a Python list of files that were selected.
             path = dlg.GetPath()
-
-            self.lb1.Append(os.path.basename(path).split('.')[0])
+            import_db(path)
             
-            # TODO: add load file here
+        session.close_all()
+        song_list = [s.name for s in Song.get_songs()]
+        for s in song_list:
+            self.lb1.Append(s)
+            
+        dlg.Destroy()
+            
+            
 
-        dlg.Destroy()  
+    def onExportDB(self, evt):
+
+        # Create the dialog. In this case the current directory is forced as the starting
+        # directory for the dialog, and no default file name is forced. This can easilly
+        # be changed in your program. This is an 'save' dialog.
+        #
+        # Unlike the 'open dialog' example found elsewhere, this example does NOT
+        # force the current working directory to change if the user chooses a different
+        # directory than the one initially set.
+        dlg = wx.FileDialog(
+            self, message="Save file as ...", defaultDir=os.getcwd(), 
+            defaultFile="", wildcard='*.xml', style=wx.SAVE
+            )
+
+        # This sets the default filter that the user will initially see. Otherwise,
+        # the first filter in the list will be used by default.
+        dlg.SetFilterIndex(2)
+
+        # Show the dialog and retrieve the user response. If it is the OK response, 
+        # process the data.
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            export_db(path)
+
+            # Normally, at this point you would save your data using the file and path
+            # data that the user provided to you, but since we didn't actually start
+            # with any data to work with, that would be difficult.
+            # 
+            # The code to do so would be similar to this, assuming 'data' contains
+            # the data you want to save:
+            #
+            # fp = file(path, 'w') # Create file anew
+            # fp.write(data)
+            # fp.close()
+            #
+            # You might want to add some error checking :-)
+            #
+
+        # Note that the current working dir didn't change. This is good since
+        # that's the way we set it up.
+
+        # Destroy the dialog. Don't do this until you are done with it!
+        # BAD things can happen otherwise!
+        dlg.Destroy()
+            
+
