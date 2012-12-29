@@ -30,7 +30,7 @@ class ParentFrame(wx.aui.AuiMDIParentFrame):
         self.Bind(wx.EVT_MENU, self.OnManageSongs, item)
         
         item = menu.Append(-1, "Search\tCtrl-S")
-        self.Bind(wx.EVT_MENU, self.OnSearch, item)
+        self.Bind(wx.EVT_MENU, self.onSearch, item)
         
         item = menu.Append(-1, "Text analysis\tCtrl-A")
         self.Bind(wx.EVT_MENU, self.OnTextAnalysis, item)
@@ -59,7 +59,7 @@ class ParentFrame(wx.aui.AuiMDIParentFrame):
         child = ChildFrame(self, self.count, "Expressions", ExpressionsPanel)
         child.Show()
         
-    def OnSearch(self, evt):
+    def onSearch(self, evt):
         self.count += 1
         child = ChildFrame(self, self.count, "Search", SearchPanel)
         child.Show()
