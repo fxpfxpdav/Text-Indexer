@@ -11,6 +11,9 @@ class FileImporter(object):
     This class imports and exports the db from and into files.
     """
     
+    def __init__(self):
+        self.word_positions = []
+    
     
     def import_file(self, name, writer, performer, path):
         """
@@ -61,6 +64,9 @@ class FileImporter(object):
                 stanza_line_number += 1
                 line_number += 1
                 
+        for word_position in self.word_positions:
+            session.add(word_position)
+        session.commit()
         
         
     def _create_word_in_DB(self, word, db_song, stanza_number, row_word_number, line_number, stanza_line_number):
@@ -68,10 +74,10 @@ class FileImporter(object):
         if not db_word:
             db_word = Word(word=word)
             session.add(db_word)
+            session.commit()
             
         word_position = WordPosition(word=db_word, song=db_song, row_word_number=row_word_number, stanza_number=stanza_number, line_number=line_number, stanza_line_number=stanza_line_number)
-        session.add(word_position)
-        session.commit()
+        self.word_positions.append(word_position)
         
 if __name__ == '__main__':
 #    FileImporter().import_file("Call Me Maybe", "Carly Rae Jepsen", r"C:\text\text_indexer\songs\call_me_maybe.txt")
