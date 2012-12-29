@@ -1,5 +1,7 @@
 import wx
 import os
+from text_indexer.orm.word_position import WordPosition
+from text_indexer.orm.song import Song
 
 class StatisticsPanel(wx.Panel):
     
@@ -31,4 +33,40 @@ class StatisticsPanel(wx.Panel):
         
         self.grid.SetRowLabelValue(0, "Chars")
         self.grid.SetRowLabelValue(1, "Words")
+        
+        from text_indexer.orm.base import session
+        
+        number_of_words = 0
+        number_of_chars = 0
+        number_of_lines = 0
+        number_of_paragraphs = 0
+        line=0
+        stanza=0
+        song_id=0
+        for wp in session.query(WordPosition).order_by(WordPosition.song_id, WordPosition.line_number).all():
+            number_of_words+=1
+            number_of_chars+=len(wp.word.word)
+            if wp.song_id != song_id:
+                line = wp.line_number
+                stanza = wp.stanza_number
+                song_id = wp.song_id
+                number_of_lines+=1
+                number_of_paragraphs+=1
+            elif wp.stanza_number != stanza:
+                stanza = wp.stanza_number
+                line= wp.line_number
+                number_of_lines+=1
+                number_of_paragraphs+=1
+            elif wp.line_number != line:
+                number_of_lines+=1
+        
+        chars_per_word = float(number_of_chars)/number_of_words
+        self.grid.SetCellValue(0, 0, str(chars_per_word))
+        self.grid.SetCellValue(0, 1, str(chars_per_word*number_of_words/number_of_lines))
+        self.grid.SetCellValue(0, 2, str(chars_per_word*number_of_words/number_of_paragraphs))
+        self.grid.SetCellValue(0, 3, str(number_of_words * chars_per_word/len(Song.get_songs())))
+        self.grid.SetCellValue(1, 0, '1')
+        self.grid.SetCellValue(1, 1, str(float(number_of_words)/number_of_lines))
+        self.grid.SetCellValue(1, 2, str(float(number_of_words)/number_of_paragraphs))
+        self.grid.SetCellValue(1, 3, str(float(number_of_words)/len(Song.get_songs())))
         
