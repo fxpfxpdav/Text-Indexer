@@ -11,7 +11,7 @@ class WordsIndexPanel(wx.Panel):
         
         wx.Panel.__init__(self, parent, -1)
         
-        self.grid = wx.grid.Grid(self, -1, (100, 50), (1200, 400))
+        self.grid = wx.grid.Grid(self, -1, (100, 50), (1220, 400))
         
         wps = session.query(WordPosition).order_by(WordPosition.song_id, WordPosition.line_number,WordPosition.row_word_number).all()
         
