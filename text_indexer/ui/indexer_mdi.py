@@ -6,7 +6,7 @@ from text_indexer.ui.analysis_panel import AnalysisPanel
 from text_indexer.ui.words_index_panel import WordsIndexPanel
 from text_indexer.ui.statistics_panel import StatisticsPanel
 from text_indexer.ui.search_panel import SearchPanel
-from text_indexer.ui.expressions_panel import ExpressionsPanel
+from text_indexer.ui.expressions_panel import GroupAndExpressionsPanel
 
 
 #----------------------------------------------------------------------
@@ -35,7 +35,7 @@ class ParentFrame(wx.aui.AuiMDIParentFrame):
         item = menu.Append(-1, "Text analysis\tCtrl-A")
         self.Bind(wx.EVT_MENU, self.OnTextAnalysis, item)
         
-        item = menu.Append(-1, "Expressions\tCtrl-A")
+        item = menu.Append(-1, "Groups and Expressions\tCtrl-G")
         self.Bind(wx.EVT_MENU, self.OnExpressions, item)
         
         item = menu.Append(-1, "Words index\tCtrl-W")
@@ -56,7 +56,7 @@ class ParentFrame(wx.aui.AuiMDIParentFrame):
 
     def OnExpressions(self, evt):
         self.count += 1
-        child = ChildFrame(self, self.count, "Expressions", ExpressionsPanel)
+        child = ChildFrame(self, self.count, "Expressions", GroupAndExpressionsPanel)
         child.Show()
         
     def onSearch(self, evt):
