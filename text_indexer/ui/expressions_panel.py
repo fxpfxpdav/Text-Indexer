@@ -1,5 +1,7 @@
 import wx
 import os
+from text_indexer.orm.expression import Expression
+from text_indexer.core.db import delete_expression
 
 class GroupAndExpressionsPanel(wx.Panel):
     
@@ -39,7 +41,7 @@ class GroupAndExpressionsPanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnAddWordToGroupFromList, self.add_word_to_group_button)
 
         self.remove_word_button = wx.Button(self, -1, "Remove Word", (300, 150))
-        self.Bind(wx.EVT_BUTTON, self.OnRemoveWordFromGroup, self.add_word_to_group_button)
+        self.Bind(wx.EVT_BUTTON, self.OnRemoveWordFromGroup, self.remove_word_button)
         
         
         
@@ -61,22 +63,23 @@ class GroupAndExpressionsPanel(wx.Panel):
         buttons_expressions_sizer = wx.BoxSizer(wx.VERTICAL)
         select_expressions_sizer = wx.BoxSizer(wx.VERTICAL)
         
-        expression_text = wx.StaticText(self, -1, "Manage Expressions", (20, 20)) 
+        expression_text = wx.StaticText(self, -1, "Manage Expressions", (20, 20))
+        self.expressions_list = [e.name for e in Expression.get_expressions()] 
         
-        self.expressions = wx.ListBox(self, 60, (100, 100), (150, 200), [], wx.LB_SINGLE)
+        self.expressions = wx.ListBox(self, 60, (100, 100), (150, 200), self.expressions_list, wx.LB_EXTENDED)
         
         self.add_expression_button = wx.Button(self, -1, "Add Expression", (300, 150))
-        self.Bind(wx.EVT_BUTTON, self.OnAddWordToExpressions, self.create_group_button) 
+        self.Bind(wx.EVT_BUTTON, self.OnAddWordToExpressions, self.add_expression_button) 
 
-        self.remove_expression_button = wx.Button(self, -1, "Remove Expression", (300, 150))
-        self.Bind(wx.EVT_BUTTON, self.OnRemoveWordFromExpressions, self.create_group_button) 
+        self.remove_expressions_button = wx.Button(self, -1, "Remove Expressions", (300, 150))
+        self.Bind(wx.EVT_BUTTON, self.onRemoveExpressions, self.remove_expressions_button) 
         
         select_expressions_sizer.Add(expression_text)
         select_expressions_sizer.Add(self.expressions)
         
         buttons_expressions_sizer.AddSpacer(100)
         buttons_expressions_sizer.Add(self.add_expression_button)
-        buttons_expressions_sizer.Add(self.remove_expression_button)
+        buttons_expressions_sizer.Add(self.remove_expressions_button)
         
         
         expressions_sizer.Add(select_expressions_sizer)
@@ -118,10 +121,25 @@ class GroupAndExpressionsPanel(wx.Panel):
         pass
 
     def OnAddWordToExpressions(self, evt):
-        pass
+        dlg = wx.TextEntryDialog(
+                self, 'Please insert the expression:')
+
+
+        if dlg.ShowModal() == wx.ID_OK:
+            expression = dlg.GetValue()
+            Expression.add_expression(expression)
+            self.expressions.Append(expression)
+            self.expressions_list.append(expression)
+
+        dlg.Destroy()
     
-    def OnRemoveWordFromExpressions(self, evt):
-        pass
+    def onRemoveExpressions(self, evt):
+        selections = self.expressions.GetSelections()
+        for selection in selections:
+            if selection != -1:
+                expression = Expression.get_expressions(expression=self.expressions.Items[selection])[0]
+                self.expressions.Delete(selection)
+                delete_expression(expression)
     
     
     

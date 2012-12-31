@@ -13,6 +13,7 @@ Created on Jul 12, 2012
 import MySQLdb
 import lxml
 import lxml.etree
+from text_indexer.orm.word_expression_association import WordExpressionAssocaition
 #def connect():
 #    engine = create_engine('mysql+mysqldb://root:root@localhost:3306/text_indexer')
 #    engine.connect()
@@ -146,6 +147,13 @@ def delete_song(song):
         session.delete(wp)
     session.commit()
     session.delete(song) 
+    session.commit()
+    
+def delete_expression(expression):
+    for wea in session.query(WordExpressionAssocaition).filter_by(expression_id=expression.id).all():
+        session.delete(wea)
+    session.commit()
+    session.delete(expression) 
     session.commit()
 
 from text_indexer.orm.base import DBBase

@@ -12,8 +12,10 @@ class WordExpressionAssocaition(DBBase):
     place = Column('place', Integer, nullable=False, primary_key=True)
     
     
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, word_id, expression_id, place):
+        self.word_id = word_id
+        self.expression_id = expression_id
+        self.place = place
     
     def __repr__(self):
         return "WordExpressionAssocaition"
