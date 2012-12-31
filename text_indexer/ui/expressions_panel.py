@@ -1,7 +1,10 @@
 import wx
 import os
 from text_indexer.orm.expression import Expression
-from text_indexer.core.db import delete_expression
+from text_indexer.core.db import delete_expression, delete_group, session
+from text_indexer.orm.group import Group
+from text_indexer.orm.word import Word
+from text_indexer.orm.word_group_association import WordGroupAssocaition
 
 class GroupAndExpressionsPanel(wx.Panel):
     
@@ -22,26 +25,30 @@ class GroupAndExpressionsPanel(wx.Panel):
         buttons_group_sizer = wx.BoxSizer(wx.VERTICAL)
         
         
-        groups_list = [] # DODO: add groups from DB
+        self.groups_list = [g.name for g in Group.get_groups()]
         
         self.select_group = wx.ComboBox(self, 500, "", (90, 50), 
-                                        (160, -1), groups_list, wx.CB_DROPDOWN)
+                                        (160, -1), self.groups_list, wx.CB_DROPDOWN)
+        self.Bind(wx.EVT_COMBOBOX, self.onGroupChosen, self.select_group)
         
         group_text = wx.StaticText(self, -1, "Manage Group", (20, 20)) 
         
         self.group_words = wx.ListBox(self, 60, (100, 100), (150, 200), [], wx.LB_SINGLE)
         
         self.create_group_button = wx.Button(self, -1, "Create New Group", (300, 150))
-        self.Bind(wx.EVT_BUTTON, self.OnCreateGroup, self.create_group_button) 
+        self.Bind(wx.EVT_BUTTON, self.onCreateGroup, self.create_group_button) 
         
         self.add_word_to_group_button = wx.Button(self, -1, "Add Word", (300, 150))
-        self.Bind(wx.EVT_BUTTON, self.OnAddWordToGroup, self.add_word_to_group_button)
+        self.Bind(wx.EVT_BUTTON, self.onAddWordToGroup, self.add_word_to_group_button)
         
-        self.add_word_to_group_from_list_button = wx.Button(self, -1, "Add Word From List", (300, 150))
-        self.Bind(wx.EVT_BUTTON, self.OnAddWordToGroupFromList, self.add_word_to_group_button)
+        self.add_word_to_group_from_list_button = wx.Button(self, -1, "Add Words From List", (300, 150))
+        self.Bind(wx.EVT_BUTTON, self.OnAddWordToGroupFromList, self.add_word_to_group_from_list_button)
 
         self.remove_word_button = wx.Button(self, -1, "Remove Word", (300, 150))
-        self.Bind(wx.EVT_BUTTON, self.OnRemoveWordFromGroup, self.remove_word_button)
+        self.Bind(wx.EVT_BUTTON, self.onRemoveWordFromGroup, self.remove_word_button)
+        
+        self.remove_group_button = wx.Button(self, -1, "Remove Group", (300, 150))
+        self.Bind(wx.EVT_BUTTON, self.onRemoveGroup, self.remove_group_button)
         
         
         
@@ -54,6 +61,7 @@ class GroupAndExpressionsPanel(wx.Panel):
         buttons_group_sizer.Add(self.add_word_to_group_button)
         buttons_group_sizer.Add(self.add_word_to_group_from_list_button)
         buttons_group_sizer.Add(self.remove_word_button)
+        buttons_group_sizer.Add(self.remove_group_button)
         
         group_sizer.Add(select_group_sizer)
         group_sizer.Add(buttons_group_sizer)
@@ -69,7 +77,7 @@ class GroupAndExpressionsPanel(wx.Panel):
         self.expressions = wx.ListBox(self, 60, (100, 100), (150, 200), self.expressions_list, wx.LB_EXTENDED)
         
         self.add_expression_button = wx.Button(self, -1, "Add Expression", (300, 150))
-        self.Bind(wx.EVT_BUTTON, self.OnAddWordToExpressions, self.add_expression_button) 
+        self.Bind(wx.EVT_BUTTON, self.onAddExpression, self.add_expression_button) 
 
         self.remove_expressions_button = wx.Button(self, -1, "Remove Expressions", (300, 150))
         self.Bind(wx.EVT_BUTTON, self.onRemoveExpressions, self.remove_expressions_button) 
@@ -92,7 +100,7 @@ class GroupAndExpressionsPanel(wx.Panel):
         
         
         word_list_text = wx.StaticText(self, -1, "Words List", (20, 20)) 
-        word_list = ["a", "b", "c"]
+        word_list = [w.word for w in Word.get_words()]
         self.lb1 = wx.ListBox(self, 60, (100, 50), (200, 400), word_list, wx.LB_EXTENDED)
         
         word_list_sizer.AddSpacer(100)
@@ -108,19 +116,66 @@ class GroupAndExpressionsPanel(wx.Panel):
         self.SetSizer(sizer)
         
     
-    def OnCreateGroup(self, evt):
-        pass
+    def onCreateGroup(self, evt):
+        dlg = wx.TextEntryDialog(
+                self, 'Please insert the group name:')
+
+
+        if dlg.ShowModal() == wx.ID_OK:
+            name = dlg.GetValue()
+            Group.add_group(name)
+            self.select_group.Append(name)
+            self.groups_list.append(name)
+            
+
+        dlg.Destroy()
     
-    def OnAddWordToGroup(self, evt):
-        pass
+    
+    def onAddWordToGroup(self, evt):
+        name = self.select_group.Items[self.select_group.Selection]
+        group = Group.get_groups(name)[0]
+        dlg = wx.TextEntryDialog(
+                self, 'Please enter the word to add:')
+
+
+        if dlg.ShowModal() == wx.ID_OK:
+            word = dlg.GetValue()
+            db_word = Word.add_word(word)
+            word_group = WordGroupAssocaition(word_id=db_word.id, group_id=group.id)
+            session.add(word_group)
+            session.commit()
+            self.group_words.Append(word)
+        dlg.Destroy()
     
     def OnAddWordToGroupFromList(self, evt):
+        selections = self.lb1.GetSelections()
+        db_group = Group.get_groups(self.select_group.Items[self.select_group.Selection])[0]
+        for selection in selections: 
+            db_word = Word.get_words(word=self.lb1.Items[selection])[0]
+            word_group = WordGroupAssocaition(word_id=db_word.id, group_id=db_group.id)
+            session.add(word_group)
+            session.commit()
+            self.group_words.Append(db_word.word)
+
+    def onRemoveWordFromGroup(self, evt):
+        selection = self.group_words.GetSelection()
+        word = self.group_words.Items[selection]
+        db_word = Word.get_words(word)[0]
+        db_group = Group.get_groups(self.select_group.Items[self.select_group.Selection])[0]
+        self.group_words.Delete(selection)
+        db_wga = session.query(WordGroupAssocaition).filter_by(group_id=db_group.id, word_id=db_word.id).first()
+        session.delete(db_wga)
+        session.commit()
+        
+    
+    def onRemoveGroup(self, evt):
+        selection = self.select_group.GetSelection()
+        group = Group.get_groups(name=self.select_group.Items[selection])[0]
+        self.select_group.Delete(selection)
+        delete_group(group)
         pass
 
-    def OnRemoveWordFromGroup(self, evt):
-        pass
-
-    def OnAddWordToExpressions(self, evt):
+    def onAddExpression(self, evt):
         dlg = wx.TextEntryDialog(
                 self, 'Please insert the expression:')
 
@@ -140,6 +195,15 @@ class GroupAndExpressionsPanel(wx.Panel):
                 expression = Expression.get_expressions(expression=self.expressions.Items[selection])[0]
                 self.expressions.Delete(selection)
                 delete_expression(expression)
+                
+    def onGroupChosen(self, evt):
+        name = self.select_group.Items[evt.GetSelection()]
+        group = Group.get_groups(name)[0]
+        self.group_words.Clear()
+        for word in group.words:
+            self.group_words.Append(word.word)
+        
+        
     
     
     
