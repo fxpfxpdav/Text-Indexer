@@ -47,6 +47,7 @@ class GroupAndExpressionsPanel(wx.Panel):
         select_group_sizer.Add(self.select_group)
         select_group_sizer.Add(self.group_words)
         
+        buttons_group_sizer.AddSpacer(100)
         buttons_group_sizer.Add(self.create_group_button)
         buttons_group_sizer.Add(self.add_word_to_group_button)
         buttons_group_sizer.Add(self.add_word_to_group_from_list_button)
@@ -73,6 +74,7 @@ class GroupAndExpressionsPanel(wx.Panel):
         select_expressions_sizer.Add(expression_text)
         select_expressions_sizer.Add(self.expressions)
         
+        buttons_expressions_sizer.AddSpacer(100)
         buttons_expressions_sizer.Add(self.add_expression_button)
         buttons_expressions_sizer.Add(self.remove_expression_button)
         
@@ -86,8 +88,18 @@ class GroupAndExpressionsPanel(wx.Panel):
         exp_sizer.Add(expressions_sizer)
         
         
+        word_list_text = wx.StaticText(self, -1, "Words List", (20, 20)) 
+        word_list = ["a", "b", "c"]
+        self.lb1 = wx.ListBox(self, 60, (100, 50), (200, 400), word_list, wx.LB_EXTENDED)
         
+        word_list_sizer.AddSpacer(100)
+        word_list_sizer.Add(word_list_text)
+        word_list_sizer.Add(self.lb1)
+        
+        
+        sizer.AddSpacer(50)
         sizer.Add(exp_sizer)
+        sizer.AddSpacer(200)        
         sizer.Add(word_list_sizer)
         
         self.SetSizer(sizer)
