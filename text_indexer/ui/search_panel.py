@@ -154,7 +154,7 @@ class SearchPanel(wx.Panel):
                 self.word_text.Value = wp.word.word
             elif self.radio_selected == self.radio3:
                 stanza = song.get_stanza(int(self.text3_1.Value))
-                self.word_text.Value = stanza.split(' ')[int(self.text3_2.Value)]
+                self.word_text.Value = stanza.split(' ')[int(self.text3_2.Value) - 1]
             if not self.word_text.Value:
                 self.word_text.Value = 'No word found'
         except Exception, e:

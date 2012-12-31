@@ -128,14 +128,14 @@ def import_db(path):
             #run the query
             cursor.execute(query)
 
-    # commit the results into the db.
+    # commit the results into the db.\z
     cursor.connection.commit()
 
 def create_cursor():
     """
     This method creats a connector to the db.
     """
-    con = MySQLdb.Connection(host = '10.0.0.129', user = 'root', 
+    con = MySQLdb.Connection(host = 'localhost', user = 'root', 
                            passwd = 'root' , db = 'text_indexer')
     cursor = con.cursor(MySQLdb.cursors.DictCursor)
     
