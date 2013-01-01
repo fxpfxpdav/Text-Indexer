@@ -36,7 +36,7 @@ class AnalysisPanel(wx.Panel):
                                         (160, -1), self.groups_list, wx.CB_DROPDOWN)
         
         btn4 = wx.Button(self, -1, "Search Group", (90, 400))
-        self.Bind(wx.EVT_BUTTON, self.phraseChosen, btn4)
+        self.Bind(wx.EVT_BUTTON, self.groupChosen, btn4)
         
         btn2 = wx.Button(self, -1, "Search Phrase", (750, 500))
         self.Bind(wx.EVT_BUTTON, self.phraseChosen, btn2)
@@ -65,8 +65,9 @@ class AnalysisPanel(wx.Panel):
         selection = self.lb2.GetSelection()
         word = self.words[selection]
         wps = set()
+        songs = [self.lb1.Items[song_selection] for song_selection in self.lb1.Selections]
         for wp in word.word_positions:
-            if wp.song in self.songs:
+            if wp.song.name in songs:
                 if (wp.song.id, wp.stanza_number) not in wps:
                     wps.add((wp.song.id, wp.stanza_number))
                     text+= wp.song.get_stanza(wp.stanza_number)
@@ -113,6 +114,30 @@ class AnalysisPanel(wx.Panel):
         self.t3.SetScrollPos(1,1)
         for m in re.finditer(" " + selected, text):
             self.t3.SetStyle(m.start()+1, m.end(), wx.TextAttr("RED", "YELLOW"))
+            
+            
+    def groupChosen(self, evt):
+        name = self.select_group.Items[self.select_group.GetSelection()]
+        group = Group.get_groups(name,type='group')[0]
+        words = group.words
+        text = ""
+        wps = set()
+        songs = [self.lb1.Items[song_selection] for song_selection in self.lb1.Selections]
+        for word in words:
+            for wp in word.word_positions:
+                if wp.song.name in songs:
+                    if (wp.song.id, wp.stanza_number) not in wps:
+                        wps.add((wp.song.id, wp.stanza_number))
+                        text+= wp.song.get_stanza(wp.stanza_number)
+                        text+= '\n\n\n'
+        
+        self.t3.SetValue(text)
+        self.t3.SetScrollPos(1,1)
+        for word in words:
+            for m in re.finditer(" " + word.word, text ):
+                self.t3.SetStyle(m.start()+1, m.end(), wx.TextAttr("RED", "YELLOW"))
+
+        
             
             
     def expressionChosen(self, evt):
