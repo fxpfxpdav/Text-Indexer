@@ -15,6 +15,10 @@ class GroupAndExpressionsPanel(wx.Panel):
         
         exp_sizer = wx.BoxSizer(wx.VERTICAL)
         
+        relation_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        relation_grid_sizer = wx.BoxSizer(wx.VERTICAL)
+        relation_buttons_sizer = wx.BoxSizer(wx.VERTICAL)
+        
         word_list_sizer = wx.BoxSizer(wx.VERTICAL)
         
         
@@ -99,6 +103,44 @@ class GroupAndExpressionsPanel(wx.Panel):
         exp_sizer.Add(expressions_sizer)
         
         
+        
+        expression_text = wx.StaticText(self, -1, "Manage relations", (20, 20))
+        
+        
+        self.relations_grid = wx.grid.Grid(self, -1)
+        
+        self.relations_grid.CreateGrid(0, 3)
+        
+        self.relations_grid.SetColSize(0, 100)
+        self.relations_grid.SetColSize(1, 100)
+        self.relations_grid.SetColSize(2, 100)
+
+        
+        self.relations_grid.SetColLabelValue(0, "Word 1")
+        self.relations_grid.SetColLabelValue(1, "Word 2")
+        self.relations_grid.SetColLabelValue(2, "Relation Name")
+        
+        
+        relation_grid_sizer.AddSpacer(50)
+        relation_grid_sizer.Add(expression_text)
+        relation_grid_sizer.AddSpacer(10)
+        relation_grid_sizer.Add(self.relations_grid)
+        
+        
+        self.add_relation_button = wx.Button(self, -1, "Add Relation", (300, 150))
+        self.Bind(wx.EVT_BUTTON, self.onAddRelation, self.add_relation_button) 
+
+        self.remove_relation_button = wx.Button(self, -1, "Remove Relation", (300, 150))
+        self.Bind(wx.EVT_BUTTON, self.onRemoveRelation, self.remove_relation_button) 
+        
+        relation_buttons_sizer.AddSpacer(100)
+        relation_buttons_sizer.Add(self.add_relation_button)
+        relation_buttons_sizer.Add(self.remove_relation_button)
+        
+        relation_sizer.Add(relation_grid_sizer)
+        relation_sizer.AddSpacer(20)
+        relation_sizer.Add(relation_buttons_sizer)
+        
         word_list_text = wx.StaticText(self, -1, "Words List", (20, 20)) 
         word_list = [w.word for w in Word.get_words()]
         self.lb1 = wx.ListBox(self, 60, (100, 50), (200, 400), word_list, wx.LB_EXTENDED)
@@ -110,7 +152,9 @@ class GroupAndExpressionsPanel(wx.Panel):
         
         sizer.AddSpacer(50)
         sizer.Add(exp_sizer)
-        sizer.AddSpacer(200)        
+        sizer.AddSpacer(50)
+        sizer.Add(relation_sizer)        
+        sizer.AddSpacer(100)        
         sizer.Add(word_list_sizer)
         
         self.SetSizer(sizer)
@@ -202,6 +246,13 @@ class GroupAndExpressionsPanel(wx.Panel):
         self.group_words.Clear()
         for word in group.words:
             self.group_words.Append(word.word)
+            
+    def onAddRelation(self, evt):
+        pass
+    
+    def onRemoveRelation(selfself, evt):
+        pass
+    
         
         
     
