@@ -14,7 +14,8 @@ import MySQLdb
 import lxml
 import lxml.etree
 from text_indexer.orm.word_expression_association import WordExpressionAssocaition
-from text_indexer.orm.word_group_association import WordGroupAssocaition
+from text_indexer.orm.word_group_association import WordGroupAssociation
+from text_indexer.orm.word_relation_association import WordRelationAssociation
 #def connect():
 #    engine = create_engine('mysql+mysqldb://root:root@localhost:3306/text_indexer')
 #    engine.connect()
@@ -157,8 +158,15 @@ def delete_expression(expression):
     session.delete(expression) 
     session.commit()
     
+def delete_relation(relation):
+    for wra in session.query(WordRelationAssociation).filter_by(relation_id=relation.id).all():
+        session.delete(wra)
+    session.commit()
+    session.delete(relation) 
+    session.commit()
+    
 def delete_group(group):
-    for wga in session.query(WordGroupAssocaition).filter_by(group_id=group.id).all():
+    for wga in session.query(WordGroupAssociation).filter_by(group_id=group.id).all():
         session.delete(wga)
     session.commit()
     session.delete(group) 

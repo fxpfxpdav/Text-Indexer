@@ -1,10 +1,12 @@
 import wx
 import os
 from text_indexer.orm.expression import Expression
-from text_indexer.core.db import delete_expression, delete_group, session
+from text_indexer.core.db import delete_expression, delete_group, session, delete_relation
 from text_indexer.orm.group import Group
 from text_indexer.orm.word import Word
-from text_indexer.orm.word_group_association import WordGroupAssocaition
+from text_indexer.orm.word_group_association import WordGroupAssociation
+from text_indexer.ui.add_relation import AddRelationDialog
+from text_indexer.orm.relation import Relation
 
 class GroupAndExpressionsPanel(wx.Panel):
     
@@ -106,10 +108,11 @@ class GroupAndExpressionsPanel(wx.Panel):
         
         expression_text = wx.StaticText(self, -1, "Manage relations", (20, 20))
         
+        self.relations = Group.get_groups(type='relation')
         
         self.relations_grid = wx.grid.Grid(self, -1)
         
-        self.relations_grid.CreateGrid(0, 3)
+        self.relations_grid.CreateGrid(len(self.relations), 3)
         
         self.relations_grid.SetColSize(0, 100)
         self.relations_grid.SetColSize(1, 100)
@@ -120,6 +123,13 @@ class GroupAndExpressionsPanel(wx.Panel):
         self.relations_grid.SetColLabelValue(1, "Word 2")
         self.relations_grid.SetColLabelValue(2, "Relation Name")
         
+        i=0
+        for relation in self.relations:
+            self.relations_grid.SetCellValue(i, 0, relation.first_word.word)
+            self.relations_grid.SetCellValue(i, 1, relation.second_word.word)
+            self.relations_grid.SetCellValue(i, 2, relation.name)
+            i+=1
+        
         
         relation_grid_sizer.AddSpacer(50)
         relation_grid_sizer.Add(expression_text)
@@ -127,14 +137,19 @@ class GroupAndExpressionsPanel(wx.Panel):
         relation_grid_sizer.Add(self.relations_grid)
         
         
+        
         self.add_relation_button = wx.Button(self, -1, "Add Relation", (300, 150))
         self.Bind(wx.EVT_BUTTON, self.onAddRelation, self.add_relation_button) 
+        
+        self.add_relation_with_words_button = wx.Button(self, -1, "Add Relation With Selected Words", (300, 150))
+        self.Bind(wx.EVT_BUTTON, self.onAddRelationWithWords, self.add_relation_with_words_button) 
 
         self.remove_relation_button = wx.Button(self, -1, "Remove Relation", (300, 150))
-        self.Bind(wx.EVT_BUTTON, self.onRemoveRelation, self.remove_relation_button) 
+        self.Bind(wx.EVT_BUTTON, self.onRemoveRelations, self.remove_relation_button) 
         
         relation_buttons_sizer.AddSpacer(100)
         relation_buttons_sizer.Add(self.add_relation_button)
+        relation_buttons_sizer.Add(self.add_relation_with_words_button)
         relation_buttons_sizer.Add(self.remove_relation_button)
         
         relation_sizer.Add(relation_grid_sizer)
@@ -185,7 +200,7 @@ class GroupAndExpressionsPanel(wx.Panel):
         if dlg.ShowModal() == wx.ID_OK:
             word = dlg.GetValue()
             db_word = Word.add_word(word)
-            word_group = WordGroupAssocaition(word_id=db_word.id, group_id=group.id)
+            word_group = WordGroupAssociation(word_id=db_word.id, group_id=group.id)
             session.add(word_group)
             session.commit()
             self.group_words.Append(word)
@@ -196,7 +211,7 @@ class GroupAndExpressionsPanel(wx.Panel):
         db_group = Group.get_groups(self.select_group.Items[self.select_group.Selection])[0]
         for selection in selections: 
             db_word = Word.get_words(word=self.lb1.Items[selection])[0]
-            word_group = WordGroupAssocaition(word_id=db_word.id, group_id=db_group.id)
+            word_group = WordGroupAssociation(word_id=db_word.id, group_id=db_group.id)
             session.add(word_group)
             session.commit()
             self.group_words.Append(db_word.word)
@@ -207,7 +222,7 @@ class GroupAndExpressionsPanel(wx.Panel):
         db_word = Word.get_words(word)[0]
         db_group = Group.get_groups(self.select_group.Items[self.select_group.Selection])[0]
         self.group_words.Delete(selection)
-        db_wga = session.query(WordGroupAssocaition).filter_by(group_id=db_group.id, word_id=db_word.id).first()
+        db_wga = session.query(WordGroupAssociation).filter_by(group_id=db_group.id, word_id=db_word.id).first()
         session.delete(db_wga)
         session.commit()
         
@@ -248,10 +263,54 @@ class GroupAndExpressionsPanel(wx.Panel):
             self.group_words.Append(word.word)
             
     def onAddRelation(self, evt):
-        pass
+        useMetal = False
+        if 'wxMac' in wx.PlatformInfo:
+            useMetal = self.cb.IsChecked()
+            
+        dlg = AddRelationDialog(self, -1, "Add Relation", size=(350, 200),
+                         #style=wx.CAPTION | wx.SYSTEM_MENU | wx.THICK_FRAME,
+                         style=wx.DEFAULT_DIALOG_STYLE, # & ~wx.CLOSE_BOX,
+                         useMetal=useMetal,
+                         )
+        dlg.CenterOnScreen()
+
+        # this does not return until the dialog is closed.
+        val = dlg.ShowModal()
     
-    def onRemoveRelation(selfself, evt):
-        pass
+
+        dlg.Destroy()
+    
+    def onAddRelationWithWords(self, evt):
+        
+        selections = self.lb1.GetSelections()
+        if len(selections) != 2:
+            return
+        first = self.lb1.Items[selections[0]]
+        second = word=self.lb1.Items[selections[1]]
+        
+        dlg = wx.TextEntryDialog(
+                self, 'Please insert the name name:')
+
+
+        if dlg.ShowModal() == wx.ID_OK:
+            name = dlg.GetValue()
+            Relation.add_relation(name, first, second)
+            grid = self.relations_grid
+            grid.InsertRows(grid.NumberRows)
+            grid.SetCellValue(grid.NumberRows-1,0, first)
+            grid.SetCellValue(grid.NumberRows-1,1, second)
+            grid.SetCellValue(grid.NumberRows-1,2, name)
+            grid.Refresh()
+
+        dlg.Destroy()
+    
+    
+    def onRemoveRelations(self, evt):
+        selections = self.relations_grid.GetSelectedRows()
+        for selection in selections:
+            relation = Group.get_groups(name=self.relations_grid.GetCellValue(selection,2))[0]
+            self.relations_grid.DeleteRows(selection)
+            delete_relation(relation)
     
         
         

@@ -13,14 +13,16 @@ class Group(DBBase):
     type = Column(String(255), nullable=False)
     
     __mapper_args__ = {'polymorphic_on': type, 'polymorphic_identity': 'group'}
-    words = relationship('Word', secondary=word_group_association.WordGroupAssocaition.__table__, backref='groups')
+    words = relationship('Word', secondary=word_group_association.WordGroupAssociation.__table__, backref='groups')
     
     @staticmethod
-    def get_groups(name=""):
+    def get_groups(name="", type=""):
         from text_indexer.orm.base import session
         groups = session.query(Group).filter(Group.type != 'expression')
         if name:
             groups = groups.filter_by(name=name)
+        if type:
+            groups = groups.filter_by(type=type)
         return groups.all()
 
 
