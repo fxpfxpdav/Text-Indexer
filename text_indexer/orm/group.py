@@ -18,7 +18,7 @@ class Group(DBBase):
     @staticmethod
     def get_groups(name="", type=""):
         from text_indexer.orm.base import session
-        groups = session.query(Group).filter(Group.type != 'expression')
+        groups = session.query(Group)
         if name:
             groups = groups.filter_by(name=name)
         if type:

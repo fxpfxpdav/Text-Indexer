@@ -31,7 +31,7 @@ class GroupAndExpressionsPanel(wx.Panel):
         buttons_group_sizer = wx.BoxSizer(wx.VERTICAL)
         
         
-        self.groups_list = [g.name for g in Group.get_groups()]
+        self.groups_list = [g.name for g in Group.get_groups(type='group')]
         
         self.select_group = wx.ComboBox(self, 500, "", (90, 50), 
                                         (160, -1), self.groups_list, wx.CB_DROPDOWN)
@@ -257,7 +257,7 @@ class GroupAndExpressionsPanel(wx.Panel):
                 
     def onGroupChosen(self, evt):
         name = self.select_group.Items[evt.GetSelection()]
-        group = Group.get_groups(name)[0]
+        group = Group.get_groups(name,type='group')[0]
         self.group_words.Clear()
         for word in group.words:
             self.group_words.Append(word.word)
