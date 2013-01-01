@@ -110,7 +110,7 @@ class GroupAndExpressionsPanel(wx.Panel):
         
         self.relations = Group.get_groups(type='relation')
         
-        self.relations_grid = wx.grid.Grid(self, -1)
+        self.relations_grid = wx.grid.Grid(self, -1, size=(380, 250))
         
         self.relations_grid.CreateGrid(len(self.relations), 3)
         
