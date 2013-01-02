@@ -1,4 +1,5 @@
 import wx
+import  wx.grid
 import os
 from text_indexer.orm.word_position import WordPosition
 from text_indexer.orm.song import Song

@@ -2,6 +2,7 @@ import wx
 import os
 
 import  wx.grid
+from text_indexer.orm.group import Group
 
 class WordsIndexPanel(wx.Panel):
     
@@ -13,9 +14,9 @@ class WordsIndexPanel(wx.Panel):
         
         self.grid = wx.grid.Grid(self, -1, (100, 50), (1220, 400))
         
-        wps = session.query(WordPosition).order_by(WordPosition.song_id, WordPosition.line_number,WordPosition.row_word_number).all()
+        self.wps = session.query(WordPosition).order_by(WordPosition.song_id, WordPosition.line_number,WordPosition.row_word_number).all()
         
-        self.grid.CreateGrid(len(wps), 8)
+        self.grid.CreateGrid(len(self.wps), 8)
         
         self.grid.SetColSize(0, 130)
         self.grid.SetColSize(1, 130)
@@ -35,12 +36,43 @@ class WordsIndexPanel(wx.Panel):
         self.grid.SetColLabelValue(6, "number in line")
         self.grid.SetColLabelValue(7, "word occurrence")
         
-        song = wps[0].song.name
+        
+        group_text = wx.StaticText(self, -1, "Select Group", (100, 480))
+        self.groups_list = [g.name for g in Group.get_groups(type='group')]
+        
+        self.select_group = wx.ComboBox(self, 500, "", (100, 500), 
+                                        (160, -1), self.groups_list, wx.CB_DROPDOWN)
+        
+        self.group_button = wx.Button(self, -1, "Show Group Index", (320, 500))
+        self.Bind(wx.EVT_BUTTON, self.groupChosen, self.group_button)
+        
+        self.refresh_button = wx.Button(self, -1, "Refresh", (500, 500))
+        self.Bind(wx.EVT_BUTTON, self.refresh, self.refresh_button)
+        
+        self.show_words()
+            
+    
+    def groupChosen(self, evt):
+        self.grid.ClearGrid()
+        name = self.select_group.Items[self.select_group.GetSelection()]
+        print name
+        group = Group.get_groups(name,type='group')[0]
+        words = group.words
+        words_text = [word.word for word in words]
+        self.show_words(words_text)
+    
+    def refresh(self, evt):
+        self.show_words()
+            
+    def show_words(self, words=None):
+        song = self.wps[0].song.name
         number=0
         number_in_song = 1
         paragraph=1
         number_in_paragraph = 1
-        for w in wps:
+        for w in self.wps:
+            if words is not None and w.word.word not in words:
+                continue
             if w.song.name != song:
                 song = w.song.name
                 number_in_song = 1
@@ -60,8 +92,5 @@ class WordsIndexPanel(wx.Panel):
             number+=1
             number_in_paragraph+=1
             number_in_song+=1
-                
-            
-            
                 
         

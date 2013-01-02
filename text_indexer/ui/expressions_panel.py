@@ -1,4 +1,5 @@
 import wx
+import  wx.grid
 import os
 from text_indexer.orm.expression import Expression
 from text_indexer.core.db import delete_expression, delete_group, session, delete_relation

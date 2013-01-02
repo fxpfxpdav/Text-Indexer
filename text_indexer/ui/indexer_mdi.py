@@ -25,53 +25,57 @@ class ParentFrame(wx.aui.AuiMDIParentFrame):
         
     def MakeMenuBar(self):
         mb = wx.MenuBar()
-        menu = wx.Menu()
-        item = menu.Append(-1, "Manage songs\tCtrl-M")
+        file_menu = wx.Menu()
+        item = file_menu.Append(-1, "Manage Songs\tCtrl-M")
         self.Bind(wx.EVT_MENU, self.OnManageSongs, item)
+
         
-        item = menu.Append(-1, "Search\tCtrl-S")
-        self.Bind(wx.EVT_MENU, self.onSearch, item)
-        
-        item = menu.Append(-1, "Text analysis\tCtrl-A")
-        self.Bind(wx.EVT_MENU, self.OnTextAnalysis, item)
-        
-        item = menu.Append(-1, "Groups and Expressions\tCtrl-G")
+        item = file_menu.Append(-1, "Groups and Expressions\tCtrl-G")
         self.Bind(wx.EVT_MENU, self.OnExpressions, item)
         
-        item = menu.Append(-1, "Words index\tCtrl-W")
+        item = file_menu.Append(-1, "Words Index\tCtrl-I")
         self.Bind(wx.EVT_MENU, self.OnWordsIndex, item)
         
-        item = menu.Append(-1, "Statistics\tCtrl-T")
+        item = file_menu.Append(-1, "Statistics\tCtrl-T")
         self.Bind(wx.EVT_MENU, self.OnStatistics, item)
              
-        item = menu.Append(-1, "Close")
+        item = file_menu.Append(-1, "Close")
         self.Bind(wx.EVT_MENU, self.OnDoClose, item)
-        mb.Append(menu, "&File")
+        
+        seacrh_menu = wx.Menu()
+        item = seacrh_menu.Append(-1, "Word\tCtrl-W")
+        self.Bind(wx.EVT_MENU, self.onSearch, item)
+        
+        item = seacrh_menu.Append(-1, "Occurrences\tCtrl-O")
+        self.Bind(wx.EVT_MENU, self.OnTextAnalysis, item)
+        
+        mb.Append(file_menu, "&File")
+        mb.Append(seacrh_menu, "&Search")
         return mb
         
     def OnManageSongs(self, evt):
         self.count += 1
-        child = ChildFrame(self, self.count, "Manage songs", ManageSongsPanel)
+        child = ChildFrame(self, self.count, "Manage Songs", ManageSongsPanel)
         child.Show()
 
     def OnExpressions(self, evt):
         self.count += 1
-        child = ChildFrame(self, self.count, "Expressions", GroupAndExpressionsPanel)
+        child = ChildFrame(self, self.count, "Groups and Expressions", GroupAndExpressionsPanel)
         child.Show()
         
     def onSearch(self, evt):
         self.count += 1
-        child = ChildFrame(self, self.count, "Search", SearchPanel)
+        child = ChildFrame(self, self.count, "Search For Word", SearchPanel)
         child.Show()
      
     def OnTextAnalysis(self, evt):
         self.count += 1
-        child = ChildFrame(self, self.count, "Analysis text", AnalysisPanel)
+        child = ChildFrame(self, self.count, "Search For Occurrence", AnalysisPanel)
         child.Show()
         
     def OnWordsIndex(self, evt):
         self.count += 1
-        child = ChildFrame(self, self.count, "Words index", WordsIndexPanel)
+        child = ChildFrame(self, self.count, "Words Index", WordsIndexPanel)
         child.Show()
         
     def OnStatistics(self, evt):  

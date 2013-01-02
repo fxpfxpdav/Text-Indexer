@@ -13,37 +13,52 @@ class AnalysisPanel(wx.Panel):
         self.words = []
         self.songs = []
         
+        song_text = wx.StaticText(self, -1, "Select Song", (100, 30))
         songList = [s.name for s in Song.get_songs()]
         self.lb1 = wx.ListBox(self, 60, (100, 50), (200, 200), songList, wx.LB_EXTENDED)
         self.lb1.SetSelection(0)
         
-        btn1 = wx.Button(self, -1, "Show words", (350, 100))
+        btn1 = wx.Button(self, -1, "Show words", (330, 120))
         self.Bind(wx.EVT_BUTTON, self.songChosen, btn1) 
         
+        words_text = wx.StaticText(self, -1, "Select Word", (450, 30))
         self.lb2 = wx.ListBox(self, 70, (450, 50), (90, 200), [], wx.LB_SINGLE)
         
-        btn2 = wx.Button(self, -1, "Show context", (600, 100))
+        words = Word.get_words()
+        for word in words:
+            self.lb2.Append(word.word)
+        
+        btn2 = wx.Button(self, -1, "Search Word", (450, 280))
         self.Bind(wx.EVT_BUTTON, self.wordChosen, btn2) 
         
+        occurrences_text = wx.StaticText(self, -1, "Occurrences", (750, 30))
         self.t3 = wx.TextCtrl(self, -1,
                         "", (750, 50),
                        size=(400, 400), style=wx.TE_MULTILINE|wx.TE_RICH2)
         
-        group_text = wx.StaticText(self, -1, "Select Group", (90, 330))
+        in_songs_text = wx.StaticText(self, -1, "In Songs", (1200, 30))
+        self.t4 = wx.TextCtrl(self, -1,
+                        "", (1200, 50),
+                       size=(100, 100), style=wx.TE_MULTILINE|wx.TE_RICH2)
+        
+        group_text = wx.StaticText(self, -1, "Select Group", (100, 380))
         self.groups_list = [g.name for g in Group.get_groups(type='group')]
         
-        self.select_group = wx.ComboBox(self, 500, "", (90, 350), 
+        self.select_group = wx.ComboBox(self, 500, "", (100, 400), 
                                         (160, -1), self.groups_list, wx.CB_DROPDOWN)
         
-        btn4 = wx.Button(self, -1, "Search Group", (90, 400))
+        btn4 = wx.Button(self, -1, "Search Group", (100, 500))
         self.Bind(wx.EVT_BUTTON, self.groupChosen, btn4)
         
         btn2 = wx.Button(self, -1, "Search Phrase", (750, 500))
         self.Bind(wx.EVT_BUTTON, self.phraseChosen, btn2)
         
+        expression_text = wx.StaticText(self, -1, "Select Expression", (450, 380))
+        
         expression_list = [e.name for e in Expression.get_expressions()]
-        self.lb3 = wx.ListBox(self, 70, (1200, 50), (90, 50), expression_list, wx.LB_SINGLE)
-        btn3 = wx.Button(self, -1, "Search Expression", (1200, 500))
+        self.lb3 = wx.ListBox(self, 70, (450, 410), (90, 50), expression_list, wx.LB_SINGLE)
+        
+        btn3 = wx.Button(self, -1, "Search Expression", (450, 500))
         self.Bind(wx.EVT_BUTTON, self.expressionChosen, btn3)
         
     def songChosen(self, evt):
@@ -138,8 +153,6 @@ class AnalysisPanel(wx.Panel):
                 self.t3.SetStyle(m.start()+1, m.end(), wx.TextAttr("RED", "YELLOW"))
 
         
-            
-            
     def expressionChosen(self, evt):
         from text_indexer.orm.base import session
         selected = self.lb3.Items[self.lb3.Selection]
@@ -171,7 +184,7 @@ class AnalysisPanel(wx.Panel):
 #        self.t3.SetValue(str(words))
         self.t3.SetValue(text)
         self.t3.SetScrollPos(1,1)
-        for m in re.finditer(" " + selected, text):
-            self.t3.SetStyle(m.start()+1, m.end(), wx.TextAttr("RED", "YELLOW"))
+        for m in re.finditer(selected, text):
+            self.t3.SetStyle(m.start(), m.end(), wx.TextAttr("RED", "YELLOW"))
                         
         
