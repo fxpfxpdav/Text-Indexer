@@ -76,7 +76,6 @@ class AnalysisPanel(wx.Panel):
         word = self.words[selection]
         wps = set()
         songs = [self.lb1.Items[song_selection] for song_selection in self.lb1.Selections]
-        found_songs = []
         for song in songs:
             added_song_name = False
             for wp in word.word_positions:
@@ -88,13 +87,6 @@ class AnalysisPanel(wx.Panel):
                         wps.add((wp.song.id, wp.stanza_number))
                         text+= wp.song.get_stanza(wp.stanza_number)
                         text+= '\n\n\n'
-                    if not wp.song.name in found_songs:
-                        found_songs.append(wp.song.name)
-        songs_text = ''
-        count=1
-        for song in found_songs:
-            songs_text += str(count) + '. ' + song + '\n'
-            count+=1
         
         self.t3.SetValue(text)
         self.t3.SetScrollPos(1,1)
@@ -126,7 +118,6 @@ class AnalysisPanel(wx.Panel):
             
         wps = set()
         text = ''
-        found_songs = []
         songs = [self.lb1.Items[song_selection] for song_selection in self.lb1.Selections]
         for song in songs:
             added_song_name = False
@@ -139,14 +130,6 @@ class AnalysisPanel(wx.Panel):
                         wps.add((wp.song.id, wp.stanza_number))
                         text+= wp.song.get_stanza(wp.stanza_number)
                         text+= '\n\n\n'
-                    if not wp.song.name in found_songs:
-                        found_songs.append(wp.song.name)
-        songs_text = ''
-        count=1
-        for song in found_songs:
-            songs_text += str(count) + '. ' + song + '\n'
-            count+=1
-        self.t4.SetValue(songs_text)
 #        
 #        self.t3.SetValue(str(words))
         self.t3.SetValue(text)
@@ -164,7 +147,6 @@ class AnalysisPanel(wx.Panel):
         text = ""
         wps = set()
         songs = [self.lb1.Items[song_selection] for song_selection in self.lb1.Selections]
-        found_songs = []
         for song in songs:
             added_song_name = False
             for word in words:
@@ -177,15 +159,7 @@ class AnalysisPanel(wx.Panel):
                             wps.add((wp.song.id, wp.stanza_number))
                             text+= wp.song.get_stanza(wp.stanza_number)
                             text+= '\n\n\n'
-                        if not wp.song.name in found_songs:
-                            found_songs.append(wp.song.name)
         
-        songs_text = ''
-        count=1
-        for song in found_songs:
-            songs_text += str(count) + '. ' + song + '\n'
-            count+=1
-        self.t4.SetValue(songs_text)
         self.t3.SetValue(text)
         self.t3.SetScrollPos(1,1)
         for word in words:
@@ -216,7 +190,6 @@ class AnalysisPanel(wx.Panel):
         wps = set()
         text = ''
         songs = [self.lb1.Items[song_selection] for song_selection in self.lb1.Selections]
-        found_songs = []
         for song in songs:
             added_song_name = False
             for wp in matches:
@@ -228,15 +201,7 @@ class AnalysisPanel(wx.Panel):
                         wps.add((wp.song.id, wp.stanza_number))
                         text+= wp.song.get_stanza(wp.stanza_number)
                         text+= '\n\n\n'
-                    if not wp.song.name in found_songs:
-                        found_songs.append(wp.song.name)
                     
-        songs_text = ''
-        count=1
-        for song in found_songs:
-            songs_text += str(count) + '. ' + song + '\n'
-            count+=1
-        self.t4.SetValue(songs_text)
 #        
 #        self.t3.SetValue(str(words))
         self.t3.SetValue(text)
