@@ -7,6 +7,7 @@ from text_indexer.ui.words_index_panel import WordsIndexPanel
 from text_indexer.ui.statistics_panel import StatisticsPanel
 from text_indexer.ui.search_panel import SearchPanel
 from text_indexer.ui.expressions_panel import GroupAndExpressionsPanel
+from text_indexer.ui.search_song_panel import SearchSongPanel
 
 
 #----------------------------------------------------------------------
@@ -49,6 +50,9 @@ class ParentFrame(wx.aui.AuiMDIParentFrame):
         item = seacrh_menu.Append(-1, "Occurrences\tCtrl-O")
         self.Bind(wx.EVT_MENU, self.OnTextAnalysis, item)
         
+        item = seacrh_menu.Append(-1, "Song\tCtrl-S")
+        self.Bind(wx.EVT_MENU, self.OnSearchSong, item)
+        
         mb.Append(file_menu, "&File")
         mb.Append(seacrh_menu, "&Search")
         return mb
@@ -83,6 +87,11 @@ class ParentFrame(wx.aui.AuiMDIParentFrame):
         child = ChildFrame(self, self.count, "Statistics", StatisticsPanel)
         child.Show()
 
+    def OnSearchSong(self, evt):  
+        self.count += 1
+        child = ChildFrame(self, self.count, "Search For Song", SearchSongPanel)
+        child.Show()
+
     def OnDoClose(self, evt):
         # Close all ChildFrames first else Python crashes
         for m in self.GetChildren():
@@ -100,16 +109,8 @@ class ChildFrame(wx.aui.AuiMDIChildFrame):
     def __init__(self, parent, count, title, panel):
         wx.aui.AuiMDIChildFrame.__init__(self, parent, -1,
                                          title=title)
-        """
-        mb = parent.MakeMenuBar()
-        menu = wx.Menu()
-        item = menu.Append(-1, "This is child %d's menu" % count)
-        mb.Append(menu, title + " menu")
-        self.SetMenuBar(mb)
-        """
         
         p = panel(self)
-        #p.SetBackgroundColour('YELLOW GREEN')       
 
         sizer = wx.BoxSizer()
         sizer.Add(p, 1, wx.EXPAND)

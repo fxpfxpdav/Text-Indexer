@@ -3,6 +3,7 @@ import os
 from text_indexer.ui.add_song import AddSongDialog
 from text_indexer.core.db import delete_song, export_db, import_db, session
 from text_indexer.orm.song import Song
+from text_indexer.orm import song
 
 class ManageSongsPanel(wx.Panel):
     
@@ -20,17 +21,24 @@ class ManageSongsPanel(wx.Panel):
         
         song_list = [s.name for s in Song.get_songs()]
         
-        self.lb1 = wx.ListBox(self, 60, (100, 100), (150, 200), song_list, wx.LB_SINGLE)
+        self.lb1 = wx.ListBox(self, 60, (50, 100), (150, 200), song_list, wx.LB_SINGLE)
+        self.Bind(wx.EVT_LISTBOX, self.EvtListBox, self.lb1)
         if len(self.lb1.Items) > 0:
             self.lb1.SetSelection(0)
+            
+        text = wx.StaticText(self, -1, "Song Writer", (250, 120))    
+        self.song_writer_text = wx.TextCtrl(self, -1, "", (250, 150), style=wx.TE_READONLY)
         
-        btn1 = wx.Button(self, -1, "Import song", (300, 150))
+        text = wx.StaticText(self, -1, "Song Performer", (250, 220))
+        self.song_performer_text = wx.TextCtrl(self, -1, "", (250, 250), style=wx.TE_READONLY)
+        
+        btn1 = wx.Button(self, -1, "Import song", (400, 150))
         self.Bind(wx.EVT_BUTTON, self.OnAddSong, btn1) 
         
-        btn2 = wx.Button(self, -1, "Remove song", (300, 210))
+        btn2 = wx.Button(self, -1, "Remove song", (400, 210))
         self.Bind(wx.EVT_BUTTON, self.OnRemoveSong, btn2)
         
-        btn3 = wx.Button(self, -1, "Show song", (300, 270))
+        btn3 = wx.Button(self, -1, "Show song", (400, 270))
         self.Bind(wx.EVT_BUTTON, self.showSong, btn3)  
          
         sizer.Add(self.lb1, 0)
@@ -47,7 +55,7 @@ class ManageSongsPanel(wx.Panel):
         self.song_text_headline = wx.StaticText(self, -1, "The Song", (600, 50))
         font = wx.Font(12, wx.SWISS, wx.NORMAL, wx.NORMAL)
         self.song_text_headline.SetFont(font)
-        self.t3 = wx.TextCtrl(self, -1, "", (600, 100), size=(500, 400), style=wx.TE_MULTILINE|wx.TE_READONLY)#|wx.TE_PROCESS_ENTER)
+        self.t3 = wx.TextCtrl(self, -1, "", (600, 100), size=(500, 400), style=wx.TE_MULTILINE|wx.TE_READONLY)
         full_sizer.Add(sizer,0, wx.ALIGN_LEFT)
         full_sizer.Add(self.song_text_headline,1, wx.ALIGN_RIGHT)
         
@@ -167,4 +175,14 @@ class ManageSongsPanel(wx.Panel):
         # BAD things can happen otherwise!
         dlg.Destroy()
             
+    
+    def EvtListBox(self, event):
+        name = event.GetString()
+        song = Song.get_songs(name=name)[0]
+        self.song_writer_text.SetValue(song.writer)
+        
+        self.song_performer_text.SetValue(song.performer)
+        
+        
+        
 
