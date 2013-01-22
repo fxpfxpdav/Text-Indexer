@@ -36,11 +36,6 @@ class AnalysisPanel(wx.Panel):
                         "", (750, 50),
                        size=(400, 400), style=wx.TE_MULTILINE|wx.TE_RICH2)
         
-        in_songs_text = wx.StaticText(self, -1, "In Songs", (1200, 30))
-        self.t4 = wx.TextCtrl(self, -1,
-                        "", (1200, 50),
-                       size=(100, 100), style=wx.TE_MULTILINE|wx.TE_RICH2)
-        
         group_text = wx.StaticText(self, -1, "Select Group", (100, 380))
         self.groups_list = [g.name for g in Group.get_groups(type='group')]
         
@@ -100,7 +95,6 @@ class AnalysisPanel(wx.Panel):
         for song in found_songs:
             songs_text += str(count) + '. ' + song + '\n'
             count+=1
-        self.t4.SetValue(songs_text)
         
         self.t3.SetValue(text)
         self.t3.SetScrollPos(1,1)
