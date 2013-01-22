@@ -10,7 +10,7 @@ class AnalysisPanel(wx.Panel):
     
     def __init__(self, parent):
         wx.Panel.__init__(self, parent, -1)
-        self.words = []
+        self.words = Word.get_words()
         self.songs = []
         
         song_text = wx.StaticText(self, -1, "Select Song", (100, 30))
@@ -18,13 +18,13 @@ class AnalysisPanel(wx.Panel):
         self.lb1 = wx.ListBox(self, 60, (100, 50), (200, 200), songList, wx.LB_EXTENDED)
         self.lb1.SetSelection(0)
         
-        btn1 = wx.Button(self, -1, "Show words", (330, 120))
-        self.Bind(wx.EVT_BUTTON, self.songChosen, btn1) 
+#        btn1 = wx.Button(self, -1, "Show words", (330, 120))
+#        self.Bind(wx.EVT_BUTTON, self.songChosen, btn1) 
         
         words_text = wx.StaticText(self, -1, "Select Word", (450, 30))
         self.lb2 = wx.ListBox(self, 70, (450, 50), (90, 200), [], wx.LB_SINGLE)
         
-        words = Word.get_words()
+        words = self.words
         for word in words:
             self.lb2.Append(word.word)
         
@@ -61,19 +61,19 @@ class AnalysisPanel(wx.Panel):
         btn3 = wx.Button(self, -1, "Search Expression", (450, 500))
         self.Bind(wx.EVT_BUTTON, self.expressionChosen, btn3)
         
-    def songChosen(self, evt):
-        self.lb2.Clear()
-        self.words = []
-        self.songs = []
-        selections = self.lb1.GetSelections()
-        for selection in selections:
-            song = Song.get_songs(name=self.lb1.Items[selection])[0]
-            self.songs.append(song)
-            for word in song.words:
-                if word not in self.words:
-                    self.words.append(word)
-                    self.lb2.Append(word.word)
-        self.lb2.SetSelection(0)
+#    def songChosen(self, evt):
+#        self.lb2.Clear()
+#        self.words = []
+#        self.songs = []
+#        selections = self.lb1.GetSelections()
+#        for selection in selections:
+#            song = Song.get_songs(name=self.lb1.Items[selection])[0]
+#            self.songs.append(song)
+#            for word in song.words:
+#                if word not in self.words:
+#                    self.words.append(word)
+#                    self.lb2.Append(word.word)
+#        self.lb2.SetSelection(0)
                 
     def wordChosen(self, evt):
         text = ''
@@ -81,17 +81,33 @@ class AnalysisPanel(wx.Panel):
         word = self.words[selection]
         wps = set()
         songs = [self.lb1.Items[song_selection] for song_selection in self.lb1.Selections]
-        for wp in word.word_positions:
-            if wp.song.name in songs:
-                if (wp.song.id, wp.stanza_number) not in wps:
-                    wps.add((wp.song.id, wp.stanza_number))
-                    text+= wp.song.get_stanza(wp.stanza_number)
-                    text+= '\n\n\n'
+        found_songs = []
+        for song in songs:
+            added_song_name = False
+            for wp in word.word_positions:
+                if wp.song.name == song:
+                    if not added_song_name:
+                        text+= song + ':\n\n'
+                        added_song_name = True
+                    if (wp.song.id, wp.stanza_number) not in wps:
+                        wps.add((wp.song.id, wp.stanza_number))
+                        text+= wp.song.get_stanza(wp.stanza_number)
+                        text+= '\n\n\n'
+                    if not wp.song.name in found_songs:
+                        found_songs.append(wp.song.name)
+        songs_text = ''
+        count=1
+        for song in found_songs:
+            songs_text += str(count) + '. ' + song + '\n'
+            count+=1
+        self.t4.SetValue(songs_text)
         
         self.t3.SetValue(text)
         self.t3.SetScrollPos(1,1)
         for m in re.finditer(" " + word.word, text ):
             self.t3.SetStyle(m.start()+1, m.end(), wx.TextAttr("RED", "YELLOW"))
+        for m in re.finditer("\n" + word.word, text ):
+                self.t3.SetStyle(m.start()+1, m.end(), wx.TextAttr("RED", "YELLOW"))
             
     
     def phraseChosen(self, evt):
@@ -116,19 +132,35 @@ class AnalysisPanel(wx.Panel):
             
         wps = set()
         text = ''
+        found_songs = []
         songs = [self.lb1.Items[song_selection] for song_selection in self.lb1.Selections]
-        for wp in matches:
-            if wp.song.song in songs:
-                if (wp.song.id, wp.stanza_number) not in wps:
-                    wps.add((wp.song.id, wp.stanza_number))
-                    text+= wp.song.get_stanza(wp.stanza_number)
-                    text+= '\n\n\n'
+        for song in songs:
+            added_song_name = False
+            for wp in matches:
+                if wp.song.name == song:
+                    if not added_song_name:
+                        text+= song + ':\n\n'
+                        added_song_name = True
+                    if (wp.song.id, wp.stanza_number) not in wps:
+                        wps.add((wp.song.id, wp.stanza_number))
+                        text+= wp.song.get_stanza(wp.stanza_number)
+                        text+= '\n\n\n'
+                    if not wp.song.name in found_songs:
+                        found_songs.append(wp.song.name)
+        songs_text = ''
+        count=1
+        for song in found_songs:
+            songs_text += str(count) + '. ' + song + '\n'
+            count+=1
+        self.t4.SetValue(songs_text)
 #        
 #        self.t3.SetValue(str(words))
         self.t3.SetValue(text)
         self.t3.SetScrollPos(1,1)
         for m in re.finditer(" " + selected, text):
             self.t3.SetStyle(m.start()+1, m.end(), wx.TextAttr("RED", "YELLOW"))
+        for m in re.finditer("\n" + word.word, text ):
+                self.t3.SetStyle(m.start()+1, m.end(), wx.TextAttr("RED", "YELLOW"))
             
             
     def groupChosen(self, evt):
@@ -138,18 +170,34 @@ class AnalysisPanel(wx.Panel):
         text = ""
         wps = set()
         songs = [self.lb1.Items[song_selection] for song_selection in self.lb1.Selections]
-        for word in words:
-            for wp in word.word_positions:
-                if wp.song.name in songs:
-                    if (wp.song.id, wp.stanza_number) not in wps:
-                        wps.add((wp.song.id, wp.stanza_number))
-                        text+= wp.song.get_stanza(wp.stanza_number)
-                        text+= '\n\n\n'
+        found_songs = []
+        for song in songs:
+            added_song_name = False
+            for word in words:
+                for wp in word.word_positions:
+                    if wp.song.name == song:
+                        if not added_song_name:
+                            text+= song + ':\n\n'
+                            added_song_name = True
+                        if (wp.song.id, wp.stanza_number) not in wps:
+                            wps.add((wp.song.id, wp.stanza_number))
+                            text+= wp.song.get_stanza(wp.stanza_number)
+                            text+= '\n\n\n'
+                        if not wp.song.name in found_songs:
+                            found_songs.append(wp.song.name)
         
+        songs_text = ''
+        count=1
+        for song in found_songs:
+            songs_text += str(count) + '. ' + song + '\n'
+            count+=1
+        self.t4.SetValue(songs_text)
         self.t3.SetValue(text)
         self.t3.SetScrollPos(1,1)
         for word in words:
             for m in re.finditer(" " + word.word, text ):
+                self.t3.SetStyle(m.start()+1, m.end(), wx.TextAttr("RED", "YELLOW"))
+            for m in re.finditer("\n" + word.word, text ):
                 self.t3.SetStyle(m.start()+1, m.end(), wx.TextAttr("RED", "YELLOW"))
 
         
@@ -164,7 +212,7 @@ class AnalysisPanel(wx.Panel):
         for w in wps:
             i = 1
             wp = w.get_next_word()
-            while i < number_of_words and wp.word.word == words[i]:
+            while i < number_of_words and wp and wp.word.word == words[i]:
                 i+=1
                 wp = wp.get_next_word()
             if i == number_of_words:
@@ -174,17 +222,34 @@ class AnalysisPanel(wx.Panel):
         wps = set()
         text = ''
         songs = [self.lb1.Items[song_selection] for song_selection in self.lb1.Selections]
-        for wp in matches:
-            if wp.song.name in songs:
-                if (wp.song.id, wp.stanza_number) not in wps:
-                    wps.add((wp.song.id, wp.stanza_number))
-                    text+= wp.song.get_stanza(wp.stanza_number)
-                    text+= '\n\n\n'
+        found_songs = []
+        for song in songs:
+            added_song_name = False
+            for wp in matches:
+                if wp.song.name == song:
+                    if not added_song_name:
+                        text+= song + ':\n\n'
+                        added_song_name = True
+                    if (wp.song.id, wp.stanza_number) not in wps:
+                        wps.add((wp.song.id, wp.stanza_number))
+                        text+= wp.song.get_stanza(wp.stanza_number)
+                        text+= '\n\n\n'
+                    if not wp.song.name in found_songs:
+                        found_songs.append(wp.song.name)
+                    
+        songs_text = ''
+        count=1
+        for song in found_songs:
+            songs_text += str(count) + '. ' + song + '\n'
+            count+=1
+        self.t4.SetValue(songs_text)
 #        
 #        self.t3.SetValue(str(words))
         self.t3.SetValue(text)
         self.t3.SetScrollPos(1,1)
         for m in re.finditer(selected, text):
             self.t3.SetStyle(m.start(), m.end(), wx.TextAttr("RED", "YELLOW"))
+        for m in re.finditer("\n" + word.word, text ):
+                self.t3.SetStyle(m.start()+1, m.end(), wx.TextAttr("RED", "YELLOW"))
                         
         
