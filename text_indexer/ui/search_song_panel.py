@@ -135,6 +135,7 @@ class SearchSongPanel(wx.Panel):
         if self.radio3.IsChecked():
             word = self.text3.Value
         songs = [s.name for s in Song.get_songs(name, writer, performer, word)]
+        self.song_list.Clear()
         self.song_list.AppendItems(songs)
             
     def onShowSong(self, evt):
